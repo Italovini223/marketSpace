@@ -18,20 +18,6 @@ export function Home(){
 
         <VStack>
           <Text fontSize="sm" color="gray.500" mt={7}>Compre produtos variados</Text>
-          {/* <Input 
-            color="gray.400"
-            bg="white"
-            rounded={2}
-            alignItems="center"
-            fontSize="md"
-            borderWidth={0}
-            borderRadius={6}
-            px={4}
-            h={12}
-            placeholder="Buscar anúncio"
-          >
-          </Input> */}
-
           <Input 
             placeholder="Buscar anúncio"
             haveIcon
