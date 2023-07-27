@@ -7,7 +7,7 @@ import { THEME } from './src/theme'
 import { Loading } from '@components/Loading'
 
 import { Routes } from '@routes/index'
-import { Home } from '@screens/Home'
+
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -22,7 +22,7 @@ export default function App() {
         translucent
       />
       {
-         fontsLoaded ? <Home /> : <Loading />
+         fontsLoaded ? <  Routes /> : <Loading />
       }
     </NativeBaseProvider>
   );
