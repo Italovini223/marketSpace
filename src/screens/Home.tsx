@@ -2,6 +2,7 @@ import { ActiveAds } from "@components/ActiveAds"
 import { HomeHeader } from "@components/HomeHeader"
 import { ScrollView, VStack, Text,useTheme } from "native-base"
 import { Input } from "@components/Input"
+import { ProductCard } from "@components/ProductCard"
 
 export function Home(){
   return (
@@ -25,6 +26,8 @@ export function Home(){
             variant="white"
           />
         </VStack>
+
+        <ProductCard />
       </VStack>
     </ScrollView>
   )
