@@ -1,9 +1,17 @@
-import { HStack, Heading, VStack, Text } from "native-base";
+import { HStack, Heading, VStack, Text, Icon } from "native-base";
 import { TouchableOpacity } from 'react-native'
+import { MaterialIcons } from '@expo/vector-icons'
 
 export function ActiveAds(){
   return(
-    <HStack w="full" h={16} bg="blue.500"  alignItems="center" px={5} borderRadius={4}>
+    <HStack w="full" h={16} bg="blue.100"  alignItems="center" mt={2} px={5} borderRadius={4}>
+      <Icon 
+        as={MaterialIcons}
+        name="local-offer"
+        size={6}
+        mr={4}
+        color="blue.700"
+      />
       <VStack color="gray.700" flex={1} >
         <Heading fontSize="lg" fontFamily="heading">
           4
@@ -13,10 +21,16 @@ export function ActiveAds(){
         </Text>
       </VStack>
 
-      <TouchableOpacity>
-        <Text color="blue.700" fontFamily="heading" fontSize="xs">
+      <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text color="blue.700" fontFamily="heading" fontSize="xs" alignItems="center">
           Meus anúncios
         </Text>
+        <Icon 
+          as={MaterialIcons}
+          name="arrow-right-alt"
+          color="blue.700"
+          size={4}
+        />
       </TouchableOpacity>
     </HStack>
   )

@@ -1,6 +1,7 @@
 import { ActiveAds } from "@components/ActiveAds"
 import { HomeHeader } from "@components/HomeHeader"
-import { ScrollView, VStack, Text } from "native-base"
+import { ScrollView, VStack, Text,useTheme } from "native-base"
+import { Input } from "@components/Input"
 
 export function Home(){
   return (
@@ -13,6 +14,30 @@ export function Home(){
             Seus produtos anunciados para venda 
           </Text>
           <ActiveAds />
+        </VStack>
+
+        <VStack>
+          <Text fontSize="sm" color="gray.500" mt={7}>Compre produtos variados</Text>
+          {/* <Input 
+            color="gray.400"
+            bg="white"
+            rounded={2}
+            alignItems="center"
+            fontSize="md"
+            borderWidth={0}
+            borderRadius={6}
+            px={4}
+            h={12}
+            placeholder="Buscar anúncio"
+          >
+          </Input> */}
+
+          <Input 
+            placeholder="Buscar anúncio"
+            haveIcon
+            IconName="search"
+            variant="white"
+          />
         </VStack>
       </VStack>
     </ScrollView>

@@ -1,8 +1,10 @@
-import { HStack, VStack, Text, Heading, Button } from "native-base";
 import { TouchableOpacity } from 'react-native'
+import { MaterialIcons } from '@expo/vector-icons'
+import { HStack, VStack, Text, Heading, Icon, useTheme} from "native-base";
 import { UserPhoto } from "./UserPhoto";
 
 export function HomeHeader(){
+  const { colors } = useTheme()
   return (
     <HStack bg="gray.100" pt={8} pb={8} alignItems="center">
       <UserPhoto 
@@ -20,16 +22,19 @@ export function HomeHeader(){
         </Heading>
       </VStack>
 
-      <Button
-        bg="gray.700"
-        _pressed={{
-          bg: "gray.600"
-        }}
+      <TouchableOpacity
+        style={{flexDirection: 'row', alignItems: 'center', backgroundColor: colors.gray[700], height: 42, padding: 12, borderRadius: 6}}
       >
+        <Icon 
+          as={MaterialIcons}
+          name='add'
+          color="gray.100"
+          mr={1}
+        />
         <Text color="gray.100" fontSize="sm" fontFamily="heading">
           Criar Anuncio
         </Text>
-      </Button>
+      </TouchableOpacity>
 
     </HStack>
   )
