@@ -1,13 +1,15 @@
+import { useState } from "react"
 import { ActiveAds } from "@components/ActiveAds"
 import { HomeHeader } from "@components/HomeHeader"
-import { ScrollView, VStack, Text,useTheme } from "native-base"
+import { ScrollView, VStack, Text, FlatList } from "native-base"
 import { Input } from "@components/Input"
 import { ProductCard } from "@components/ProductCard"
 
 export function Home(){
+  const [products, setProducts] = useState([1, 2, 3, 4, 5, 6, 7, 8])
   return (
-    <ScrollView bg="gray.100">
-      <VStack flex={1} px={6}>
+    <VStack bg="gray.100" flex={1} >
+      <VStack flex={1} px={4}>
         <HomeHeader />
 
         <VStack >
@@ -27,8 +29,43 @@ export function Home(){
           />
         </VStack>
 
-        <ProductCard />
+        <VStack flex={1} alignItems="center">
+          {
+            products.length < 2 ? 
+              <FlatList 
+                  data={products}
+                  keyExtractor={item => String(item)}
+                  flexDirection="row"
+                  renderItem={({item}) => (
+                    <ProductCard 
+                      isLoading={false}
+                    />
+                  )}
+              />
+
+              :
+
+              <FlatList 
+                data={products}
+                keyExtractor={item => String(item)}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                  justifyContent: 'space-between'
+                }}
+                numColumns={2}
+                renderItem={({item}) => (
+                  <ProductCard 
+                    isLoading={false}
+                  />
+              )}
+            />
+
+          }
+
+        </VStack>
+
+
       </VStack>
-    </ScrollView>
+    </VStack>
   )
 }
