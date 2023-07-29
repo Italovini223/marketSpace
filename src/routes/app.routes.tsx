@@ -7,6 +7,7 @@ import { useTheme } from "native-base";
 import { Home } from "@screens/Home";
 import { Product } from "@screens/Product";
 import { MyProducts } from "@screens/MyProduct";
+import { New } from "@screens/New";
 
 import { House, Tag, SignOut } from 'phosphor-react-native'
 type AppRoutes = {
@@ -14,6 +15,7 @@ type AppRoutes = {
   product: undefined;
   myProducts: undefined;
   logout: undefined;
+  new: undefined;
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
@@ -74,6 +76,17 @@ export function AppRoutes(){
             />
           ),
 
+        }}
+      />
+
+      <Screen 
+        name="new"
+        component={New}
+        options={{
+          tabBarButton: () => undefined,
+          tabBarStyle: {
+            display: 'none'
+          }
         }}
       />
 

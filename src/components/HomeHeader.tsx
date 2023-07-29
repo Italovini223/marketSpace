@@ -3,8 +3,17 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { HStack, VStack, Text, Heading, Icon, useTheme} from "native-base";
 import { UserPhoto } from "./UserPhoto";
 
+import { useNavigation } from "@react-navigation/native"
+import { AppNavigatorRoutesProps } from '@routes/app.routes'
+
 export function HomeHeader(){
   const { colors } = useTheme()
+  const navigation = useNavigation<AppNavigatorRoutesProps>()
+
+  function handleNewNavigate(){
+    navigation.navigate('new')
+  }
+
   return (
     <HStack bg="gray.100" pt={8} pb={8} alignItems="center">
       <UserPhoto 
@@ -24,6 +33,7 @@ export function HomeHeader(){
 
       <TouchableOpacity
         style={{flexDirection: 'row', alignItems: 'center', backgroundColor: colors.gray[700], height: 42, padding: 12, borderRadius: 6}}
+        onPress={handleNewNavigate}
       >
         <Icon 
           as={MaterialIcons}
