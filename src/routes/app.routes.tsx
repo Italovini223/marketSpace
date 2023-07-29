@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { createBottomTabNavigator, BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator as StackNavigator } from "@react-navigation/native-stack";
 
 import { useTheme } from "native-base";
 
@@ -18,6 +19,7 @@ type AppRoutes = {
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
 export function AppRoutes(){
   const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>()
+  
 
   const { sizes, colors } = useTheme()
   const iconsSize = sizes[6]
@@ -33,6 +35,7 @@ export function AppRoutes(){
         backgroundColor: colors.gray[100],
         borderTopWidth: 0,
         height: Platform.OS === 'android' ? 'auto' : 56,
+
       }
       
     }}>
@@ -50,6 +53,17 @@ export function AppRoutes(){
       />
 
       <Screen 
+        name="product"
+        component={Product}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: {
+            display: 'none'
+          }
+        }}
+      />
+
+      <Screen 
         name="myProducts"
         component={MyProducts}
         options={{
@@ -58,18 +72,16 @@ export function AppRoutes(){
               color={color}
               size={iconsSize}
             />
-          )
-        }}
-      />
+          ),
 
-      <Screen 
-        name="product"
-        component={Product}
-        options={{
-          tabBarButton: () => null
         }}
       />
 
     </Navigator>
+
   )
+}
+
+export function AppStackNavigator(){
+  
 }

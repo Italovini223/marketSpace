@@ -32,6 +32,7 @@ export function SingIn() {
           <Text fontFamily="body" fontSize="sm" color="gray.600">Acesse sua conta</Text>
           <Input 
             placeholder='E-mail'
+            
           />
 
           <Input

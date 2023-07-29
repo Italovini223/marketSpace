@@ -1,12 +1,14 @@
 import { useState } from "react"
+
 import { ActiveAds } from "@components/ActiveAds"
 import { HomeHeader } from "@components/HomeHeader"
-import { ScrollView, VStack, Text, FlatList } from "native-base"
+import { VStack, Text, FlatList } from "native-base"
 import { Input } from "@components/Input"
 import { ProductCard } from "@components/ProductCard"
 
 export function Home(){
   const [products, setProducts] = useState([1, 2, 3, 4, 5, 6, 7, 8])
+
   return (
     <VStack bg="gray.100" flex={1} >
       <VStack flex={1} px={4}>
