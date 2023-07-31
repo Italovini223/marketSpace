@@ -23,132 +23,138 @@ export function New(){
     navigation.navigate('home')
   }
 
+  function handleAdvance(){
+    navigation.navigate('preView')
+  }
+
   return(
-    <ScrollView flex={1} bg="gray.200" showsVerticalScrollIndicator={false}>
-      <VStack flex={1} pb={Platform.OS === 'android' ? 'auto' : 2}>
-        <HStack w="full" h={24} alignItems="center" justifyContent="center" position="relative">
-          <TouchableOpacity 
-          onPress={handleBack}
-            style={{
-              position: 'absolute',
-              left: sizes[6]
-            }}
-          >
-            <ArrowLeft 
-              size={sizes[6]}
-              color={colors.gray[700]}
-            />
-          </TouchableOpacity>
-
-          <Heading fontFamily="heading" fontSize="lg" color="gray.700">
-          Criar anúncio
-          </Heading>
-        </HStack>
-        <VStack flex={1} px={6}>
-          <VStack w="full">
-            <HeadingTopic title='Imagens'/>
-            <Text>
-              Escolha até 3 imagens para mostrar o quando o seu produto é incrível!
-            </Text>
-            <HStack>
-              {
-                images &&
-                images.map((image) => (
-                  <ProductImageCard 
-                    source={{uri: image}}
-                    description='teste'
-                    onPress={() => console.log('clicou')}
-                    key={image}
-                  />
-                ))
-              }
-              <SelectProductImage />
-            </HStack>
-          </VStack>
-
-          <VStack mt={8}>
-            <HeadingTopic title='Sobre o produto'/>
-            <Input 
-              variant="white"
-              placeholder='Nome do produto'
-            />
-            <TextArea 
-              h={40}
-              bg="white"
-              borderWidth={0}
-              rounded="md"
-              color="gray.400"
-              fontSize="md"
-              placeholder="Descrição do produto"
-              autoCompleteType={false}
-            />
-
-           <Radio.Group
-            name='productStyle'
-            defaultValue='new'
-            flexDirection="row"
-           >
-            <Stack
-              direction={{
-                base: 'row'
+    <VStack flex={1} bg="gray.200">
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <VStack flex={1} pb={Platform.OS === 'android' ? 'auto' : 2}>
+          <HStack w="full" h={24} alignItems="center" justifyContent="center" position="relative">
+            <TouchableOpacity 
+            onPress={handleBack}
+              style={{
+                position: 'absolute',
+                left: sizes[6]
               }}
-              w="full"
-              justifyContent="space-between"
-              alignItems="center"
-              mt={4}
             >
-              <Radio value='new'>
-                Produto novo
-              </Radio>
-              <Radio value='used'>
-                Produto usado
-              </Radio>
+              <ArrowLeft 
+                size={sizes[6]}
+                color={colors.gray[700]}
+              />
+            </TouchableOpacity>
 
-            </Stack>
-           </Radio.Group>
-          </VStack>
+            <Heading fontFamily="heading" fontSize="lg" color="gray.700">
+            Criar anúncio
+            </Heading>
+          </HStack>
+          <VStack flex={1} px={6}>
+            <VStack w="full">
+              <HeadingTopic title='Imagens'/>
+              <Text>
+                Escolha até 3 imagens para mostrar o quando o seu produto é incrível!
+              </Text>
+              <HStack>
+                {
+                  images &&
+                  images.map((image) => (
+                    <ProductImageCard 
+                      source={{uri: image}}
+                      description='teste'
+                      onPress={() => console.log('clicou')}
+                      key={image}
+                    />
+                  ))
+                }
+                <SelectProductImage />
+              </HStack>
+            </VStack>
 
-          <VStack mt={8}>
-            <HeadingTopic title='Valor R$'/>
-            <Input 
-              variant="white"
-              placeholder='Digite o valor do produto'
-            />
-          </VStack>
+            <VStack mt={8}>
+              <HeadingTopic title='Sobre o produto'/>
+              <Input 
+                variant="white"
+                placeholder='Nome do produto'
+              />
+              <TextArea 
+                h={40}
+                bg="white"
+                borderWidth={0}
+                rounded="md"
+                color="gray.400"
+                fontSize="md"
+                placeholder="Descrição do produto"
+                autoCompleteType={false}
+              />
 
-          <VStack mt={2}>
-            <HeadingTopic title='Aceita troca?'/>
-            <Switch 
-              size="md"
-              
-            />
-          </VStack>
-          <VStack mt={4}>
-            <HeadingTopic title='Meios de pagamento aceitos'/>
-            <Checkbox.Group onChange={setPaymentOptions} value={paymentOptions}>
-              <Checkbox value='boleto' mb={3}>Boleto</Checkbox>
-              <Checkbox value='pix' mb={3}>Pix</Checkbox>
-              <Checkbox value='dinheiro' mb={3}>Dinheiro</Checkbox>
-              <Checkbox value='credito' mb={3}>Cartão de Crédito</Checkbox>
-              <Checkbox value='deposito' mb={3}>Depósito Bancário</Checkbox>
-            </Checkbox.Group>
+            <Radio.Group
+              name='productStyle'
+              defaultValue='new'
+              flexDirection="row"
+            >
+              <Stack
+                direction={{
+                  base: 'row'
+                }}
+                w="full"
+                justifyContent="space-between"
+                alignItems="center"
+                mt={4}
+              >
+                <Radio value='new'>
+                  Produto novo
+                </Radio>
+                <Radio value='used'>
+                  Produto usado
+                </Radio>
+
+              </Stack>
+            </Radio.Group>
+            </VStack>
+
+            <VStack mt={8}>
+              <HeadingTopic title='Valor R$'/>
+              <Input 
+                variant="white"
+                placeholder='Digite o valor do produto'
+              />
+            </VStack>
+
+            <VStack mt={2}>
+              <HeadingTopic title='Aceita troca?'/>
+              <Switch 
+                size="md"
+                
+              />
+            </VStack>
+            <VStack mt={4}>
+              <HeadingTopic title='Meios de pagamento aceitos'/>
+              <Checkbox.Group onChange={setPaymentOptions} value={paymentOptions}>
+                <Checkbox value='boleto' mb={3}>Boleto</Checkbox>
+                <Checkbox value='pix' mb={3}>Pix</Checkbox>
+                <Checkbox value='dinheiro' mb={3}>Dinheiro</Checkbox>
+                <Checkbox value='credito' mb={3}>Cartão de Crédito</Checkbox>
+                <Checkbox value='deposito' mb={3}>Depósito Bancário</Checkbox>
+              </Checkbox.Group>
+            </VStack>
           </VStack>
         </VStack>
-        
-      </VStack>
+      </ScrollView>
       <HStack w="full" h={24} bg="gray.100" px={6} alignItems="center" >
-        
-          <Button 
-            title='Cancelar'
-            w="50%"
-            mr={3}
-          />
-          <Button 
-            title='Avançar'
-            variant="ghost"
-            w="50%"
-          />
-      </HStack>
-    </ScrollView>
+          
+            <Button 
+              title='Cancelar'
+              w="50%"
+              mr={3}
+            />
+            <Button 
+              title='Avançar'
+              variant="ghost"
+              w="50%"
+              onPress={handleAdvance}
+            />
+        </HStack>
+    </VStack>
   )
 }

@@ -8,14 +8,17 @@ import { Home } from "@screens/Home";
 import { Product } from "@screens/Product";
 import { MyProducts } from "@screens/MyProduct";
 import { New } from "@screens/New";
+import { PreView } from "@screens/PreView";
 
 import { House, Tag, SignOut } from 'phosphor-react-native'
+
 type AppRoutes = {
   home: undefined;
   product: undefined;
   myProducts: undefined;
   logout: undefined;
   new: undefined;
+  preView: undefined
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
@@ -82,6 +85,17 @@ export function AppRoutes(){
       <Screen 
         name="new"
         component={New}
+        options={{
+          tabBarButton: () => undefined,
+          tabBarStyle: {
+            display: 'none'
+          }
+        }}
+      />
+
+      <Screen 
+        name="preView"
+        component={PreView}
         options={{
           tabBarButton: () => undefined,
           tabBarStyle: {

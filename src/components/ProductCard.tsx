@@ -33,7 +33,7 @@ export function ProductCard({ isLoading, isNew }: Props){
           endColor="gray.200"
         />
         :
-        <TouchableOpacity style={{width: 155, marginRight: 5, marginBottom: 24,}} onPress={handleProduct}>
+        <TouchableOpacity style={{width: 155, marginRight: 5, marginBottom: 24,}} onPress={handleProduct} >
           <Box>
             <Image 
               source={ImgExample}
