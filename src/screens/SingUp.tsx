@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native'
-import { ScrollView, VStack, Image, Text, Center } from 'native-base'
+import { ScrollView, VStack, Image, Text, Center, Box } from 'native-base'
 
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -14,6 +14,7 @@ import LogoImg from '@assets/logo.png'
 import { Input } from '@components/Input'
 import { Button } from '@components/Button'
 import { Platform } from 'react-native'
+import { UserPhotoSelector } from '@components/UserPhotoSelector'
 
 type formDataProps = {
   name: string,
@@ -68,6 +69,16 @@ export function SingUp(){
             </Text>
           </Center>
         </VStack>
+
+        <Box w="full" alignItems="center" justifyContent="center" mb={6}>
+        <UserPhotoSelector 
+          //photoUri='https://github.com/italovini223.png'
+          alt='foto do usuário'
+          onPress={() => console.log('clicou')}
+        />
+
+        </Box>
+
 
 
         <VStack >
