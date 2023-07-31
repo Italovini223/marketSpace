@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import { useNavigation } from '@react-navigation/native'
 import { ScrollView, VStack, Image, Text, Center, Box } from 'native-base'
 
@@ -6,6 +8,12 @@ import { yupResolver } from '@hookform/resolvers/yup'
 
 import { useForm, Controller } from 'react-hook-form'
 
+import * as ImagePicker from 'expo-image-picker'
+ 
+
+import * as FileSystem from 'expo-file-system'
+
+import { FileInfo } from 'expo-file-system'
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
 
@@ -13,7 +21,7 @@ import LogoImg from '@assets/logo.png'
 
 import { Input } from '@components/Input'
 import { Button } from '@components/Button'
-import { Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { UserPhotoSelector } from '@components/UserPhotoSelector'
 
 type formDataProps = {
@@ -23,19 +31,19 @@ type formDataProps = {
   password: string;
   passwordConfirm: string;
 }
+const phoneNumberRegex = /^(?:(?:\+|00)?(55)\s?)?(?:\(?([1-9][0-9])\)?\s?)?(?:((?:9\d|[2-9])\d{3})\-?(\d{4}))$/
+const singUpSchema = yup.object({
+  name: yup.string().required('Informe o seu nome'),
+  email: yup.string().required('Informe o email').email('Digite um email valido'),
+  phoneNumber: yup.string().required('Informe o seu numero de telefone').matches(phoneNumberRegex, 'Numero invalido'),
+  password: yup.string().required('Informe uma senha').min(6, 'A senha deve conter no mínimo seis dígitos'),
+  passwordConfirm: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'Digite a mesma senha')
+})
 
 export function SingUp(){
+  const [userPhoto, setUserPhoto] = useState<string>()
+  const [photoIsLoading, setPhotoIsLoading] = useState(false)
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
-
-  const phoneNumberRegex = /^(?:(?:\+|00)?(55)\s?)?(?:\(?([1-9][0-9])\)?\s?)?(?:((?:9\d|[2-9])\d{3})\-?(\d{4}))$/
-
-  const singUpSchema = yup.object({
-    name: yup.string().required('Informe o seu nome'),
-    email: yup.string().required('Informe o email').email('Digite um email valido'),
-    phoneNumber: yup.string().required('Informe o seu numero de telefone').matches(phoneNumberRegex, 'Numero invalido'),
-    password: yup.string().required('Informe uma senha').min(6, 'A senha deve conter no mínimo seis dígitos'),
-    passwordConfirm: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'Digite a mesma senha')
-  })
 
   const { control, handleSubmit, formState:{errors} } = useForm<formDataProps>({
     resolver: yupResolver(singUpSchema)
@@ -43,6 +51,34 @@ export function SingUp(){
 
   function handleSingIn(){
     navigation.navigate('singIn')
+  }
+
+  async function handleUserPhotoSelect(){
+    try {
+      setPhotoIsLoading(true)
+
+
+      const photoSelected = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true,
+      })
+  
+      if(photoSelected.canceled){
+        return;
+      }
+      
+      const photoInfo = await FileSystem.getInfoAsync(photoSelected.assets[0].uri, { size: true}) as FileInfo
+      if(photoInfo.exists && (photoInfo.size /1024 /1024) > 5){
+        return Alert.alert('Essa imagem e muito grande. Escolha uma ate 5MB')
+      }
+      setUserPhoto(photoSelected.assets[0].uri)
+    } catch (error) {
+        console.log(error)
+    } finally {
+      setPhotoIsLoading(false)
+    }
   }
 
   function handleSingUp({ name, email, password, passwordConfirm, phoneNumber }:formDataProps){
@@ -61,6 +97,7 @@ export function SingUp(){
           <Image 
             source={LogoImg}
             alt='Logo marketSpace'
+            
           />
           <Center flex={1} alignItems="center"  justifyContent="center" mx={10}>
             <Text fontFamily="heading" fontSize="lg" my={2} color="gray.700">Boas vindas!</Text>
@@ -72,9 +109,10 @@ export function SingUp(){
 
         <Box w="full" alignItems="center" justifyContent="center" mb={6}>
         <UserPhotoSelector 
-          //photoUri='https://github.com/italovini223.png'
+          photoUri={userPhoto ? userPhoto : undefined}
           alt='foto do usuário'
-          onPress={() => console.log('clicou')}
+          isLoading={photoIsLoading}
+          onPress={handleUserPhotoSelect}
         />
 
         </Box>
