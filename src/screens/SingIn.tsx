@@ -6,7 +6,7 @@ import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 
 
-import { VStack, Image, Text, Center, ScrollView} from 'native-base'
+import { VStack, Image, Text, Center, ScrollView, useToast} from 'native-base'
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
 
@@ -15,6 +15,8 @@ import { Button } from '@components/Button'
 
 import LogoImg from '@assets/logo.png'
 import { Platform } from 'react-native'
+import { api } from '@services/api'
+import { AppError } from '@utils/appError'
 
 type formDataProps = {
   email: string;
@@ -23,6 +25,7 @@ type formDataProps = {
 
 export function SingIn() {
   const navigation = useNavigation<AuthNavigatorRoutesProps>()
+  const toast = useToast()
 
   const singInSchema = yup.object({
     email: yup.string().required('Informe o email').email('email invalido'),
@@ -38,8 +41,23 @@ export function SingIn() {
     navigation.navigate('singUp')
   }
 
-  function handleSingIn({ email, password }: formDataProps){
+  async function handleSingIn({ email, password }: formDataProps){
+    try {
+      const response = await api.post('/sessions', {
+        email,
+        password
+      })
+    } catch (error) {
+      const isAppError = error instanceof AppError
 
+      const title = isAppError ? error.message : 'Nao foi possível fazer login'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    }
   }
 
   return (
