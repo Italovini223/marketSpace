@@ -1,6 +1,13 @@
 import { TouchableOpacity } from 'react-native'
+
+import { useAuth } from '@hooks/useAuth'
+
+import { api } from '@services/api';
+
 import { MaterialIcons } from '@expo/vector-icons'
+
 import { HStack, VStack, Text, Heading, Icon, useTheme} from "native-base";
+
 import { UserPhoto } from "./UserPhoto";
 
 import { useNavigation } from "@react-navigation/native"
@@ -10,6 +17,8 @@ export function HomeHeader(){
   const { colors } = useTheme()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
 
+  const { user } = useAuth()
+
   function handleNewNavigate(){
     navigation.navigate('new')
   }
@@ -18,7 +27,7 @@ export function HomeHeader(){
     <HStack bg="gray.100" pt={8} pb={8} alignItems="center">
       <UserPhoto 
         size={10}
-        source={{uri: "https://github.com/italovini223.png"}}
+        source={{uri: `${api.defaults.baseURL}/images/${user.avatar}`}}
         alt="Imagem do usuário"
         mr={4}
       />
@@ -27,7 +36,7 @@ export function HomeHeader(){
           Boas vindas,
         </Text>
         <Heading color="gray.700" fontSize="md" fontFamily="heading">
-          Ítalo!
+          {user.name}
         </Heading>
       </VStack>
 

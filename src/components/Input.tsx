@@ -48,6 +48,7 @@ export function Input({haveIcon = false, IconName, onPress, variant, isInvalid, 
           :
           undefined
         }
+
         {...rest}
       />
 

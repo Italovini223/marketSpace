@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native'
 
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 
 import * as yup from 'yup'
@@ -10,12 +11,13 @@ import { VStack, Image, Text, Center, ScrollView, useToast} from 'native-base'
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
 
+import { useAuth } from '@hooks/useAuth'
+
 import { Input } from '@components/Input'
 import { Button } from '@components/Button'
 
 import LogoImg from '@assets/logo.png'
 import { Platform } from 'react-native'
-import { api } from '@services/api'
 import { AppError } from '@utils/appError'
 
 type formDataProps = {
@@ -24,8 +26,13 @@ type formDataProps = {
 }
 
 export function SingIn() {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSecurityTextAtive, setIsSecurityTextAtive] = useState(true)
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>()
   const toast = useToast()
+
+  const { singIn } = useAuth()
 
   const singInSchema = yup.object({
     email: yup.string().required('Informe o email').email('email invalido'),
@@ -43,10 +50,10 @@ export function SingIn() {
 
   async function handleSingIn({ email, password }: formDataProps){
     try {
-      const response = await api.post('/sessions', {
-        email,
-        password
-      })
+      setIsLoading(true)
+
+      await singIn(email, password);
+      
     } catch (error) {
       const isAppError = error instanceof AppError
 
@@ -57,6 +64,8 @@ export function SingIn() {
         placement: 'top',
         bgColor: 'red.500'
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -96,6 +105,10 @@ export function SingIn() {
                 <Input
                   placeholder='Senha'
                   variant='white'
+                  secureTextEntry={isSecurityTextAtive}
+                  haveIcon
+                  IconName={isSecurityTextAtive ? 'visibility' : 'visibility-off'}
+                  onPress={() => setIsSecurityTextAtive(!isSecurityTextAtive)}
                   onChangeText={onChange}
                   value={value}
                   errorMessage={errors.password?.message}
@@ -109,6 +122,7 @@ export function SingIn() {
               title='Entrar' 
               variant="outline"
               onPress={handleSubmit(handleSingIn)}
+              isLoading={isLoading}
             />
           </Center>
 

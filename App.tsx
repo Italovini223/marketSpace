@@ -1,6 +1,8 @@
 import { Karla_400Regular, Karla_700Bold, useFonts } from '@expo-google-fonts/karla'
 import { Text, StatusBar } from 'react-native'
 
+import { AuthContextProvider } from '@contexts/AuthContext'
+
 import { NativeBaseProvider } from 'native-base'
 import { THEME } from './src/theme'
 
@@ -21,9 +23,9 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      {
-         fontsLoaded ? <  Routes /> : <Loading />
-      }
+      <AuthContextProvider>
+        { fontsLoaded ? <  Routes /> : <Loading /> }
+      </AuthContextProvider>
     </NativeBaseProvider>
   );
 }

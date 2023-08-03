@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native'
-import { ScrollView, VStack, Image, Text, Center, Box } from 'native-base'
+import { ScrollView, VStack, Image, Text, Center, Box, useToast } from 'native-base'
 
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -13,6 +13,12 @@ import * as ImagePicker from 'expo-image-picker'
 
 import * as FileSystem from 'expo-file-system'
 
+import { api } from '@services/api'
+
+import { AppError } from '@utils/appError'
+
+import { useAuth } from '@hooks/useAuth'
+
 import { FileInfo } from 'expo-file-system'
 
 import { AuthNavigatorRoutesProps } from '@routes/auth.routes'
@@ -21,13 +27,14 @@ import LogoImg from '@assets/logo.png'
 
 import { Input } from '@components/Input'
 import { Button } from '@components/Button'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { UserPhotoSelector } from '@components/UserPhotoSelector'
+
 
 type formDataProps = {
   name: string,
   email: string;
-  phoneNumber: string;
+  tel: string;
   password: string;
   passwordConfirm: string;
 }
@@ -35,15 +42,22 @@ const phoneNumberRegex = /^(?:(?:\+|00)?(55)\s?)?(?:\(?([1-9][0-9])\)?\s?)?(?:((
 const singUpSchema = yup.object({
   name: yup.string().required('Informe o seu nome'),
   email: yup.string().required('Informe o email').email('Digite um email valido'),
-  phoneNumber: yup.string().required('Informe o seu numero de telefone').matches(phoneNumberRegex, 'Numero invalido'),
+  tel: yup.string().required('Informe o seu numero de telefone').matches(phoneNumberRegex, 'Numero invalido'),
   password: yup.string().required('Informe uma senha').min(6, 'A senha deve conter no mínimo seis dígitos'),
   passwordConfirm: yup.string().required('Confirme a senha').oneOf([yup.ref('password')], 'Digite a mesma senha')
 })
 
 export function SingUp(){
+  const [isLoading, setIsLoading] = useState(false)
   const [userPhoto, setUserPhoto] = useState<string>()
+  const [avatar, setAvatar] = useState<any>({} as any)
   const [photoIsLoading, setPhotoIsLoading] = useState(false)
+  const [isSecurityTextAtivePassword, setIsSecurityTextAtivePassword] = useState(true)
+  const [isSecurityTextAtivePasswordConfirm, setIsSecurityTextAtivePasswordConfirm] = useState(true)
+
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const { singIn } = useAuth()
+  const toast = useToast()
 
   const { control, handleSubmit, formState:{errors} } = useForm<formDataProps>({
     resolver: yupResolver(singUpSchema)
@@ -71,8 +85,25 @@ export function SingUp(){
       
       const photoInfo = await FileSystem.getInfoAsync(photoSelected.assets[0].uri, { size: true}) as FileInfo
       if(photoInfo.exists && (photoInfo.size /1024 /1024) > 5){
-        return Alert.alert('Essa imagem e muito grande. Escolha uma ate 5MB')
+        toast.show({
+          title: 'Essa imagem e muito grande. Escolha uma ate 5MB',
+          placement: 'top',
+          bgColor: 'red.500'
+        })
+
+        return
       }
+
+      const fileExtension = photoSelected.assets[0].uri.split('.').pop()
+
+      const photoFile = {
+        name: `profile_picture.${fileExtension}`,
+        uri: photoSelected.assets[0].uri,
+        type: `${photoSelected.assets[0].type}/${fileExtension}`
+      } as any
+
+      setAvatar(photoFile);
+      
       setUserPhoto(photoSelected.assets[0].uri)
     } catch (error) {
         console.log(error)
@@ -81,8 +112,42 @@ export function SingUp(){
     }
   }
 
-  function handleSingUp({ name, email, password, passwordConfirm, phoneNumber }:formDataProps){
+  async function handleSingUp({ name, email, password, tel }:formDataProps){
+    try{
+      setIsLoading(true)
 
+      const userUploadForm = new FormData()
+      userUploadForm.append('avatar', avatar)
+      userUploadForm.append('name', name)
+      userUploadForm.append('email', email)
+      userUploadForm.append('password', password)
+      userUploadForm.append('tel', tel)
+
+      await api.post('/users', userUploadForm)
+
+      toast.show({
+        title: 'usuário criado com sucesso',
+        placement: 'top',
+        bgColor: 'success.500'
+      })
+
+      await singIn(email, password)
+
+    } catch (error){
+      setIsLoading(false)
+
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : 'Nao foi possível criar a conta'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+      
+    } finally{
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -149,7 +214,7 @@ export function SingUp(){
           />
 
           <Controller 
-            name='phoneNumber'
+            name='tel'
             control={control}
             render={({ field: { onChange, value }}) => (
               <Input 
@@ -158,7 +223,7 @@ export function SingUp(){
                 keyboardType="number-pad"
                 onChangeText={onChange}
                 value={value}
-                errorMessage={errors.phoneNumber?.message}
+                errorMessage={errors.tel?.message}
               />
             )}
           />
@@ -170,6 +235,10 @@ export function SingUp(){
               <Input 
                 placeholder='Senha'
                 variant="white"
+                secureTextEntry={isSecurityTextAtivePassword}
+                haveIcon
+                IconName={isSecurityTextAtivePassword ? 'visibility' : 'visibility-off'}
+                onPress={() => setIsSecurityTextAtivePassword(!isSecurityTextAtivePassword)}
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.password?.message}
@@ -183,6 +252,10 @@ export function SingUp(){
               <Input 
                 placeholder='Confirmar senha'
                 variant="white"
+                secureTextEntry={isSecurityTextAtivePasswordConfirm}
+                haveIcon
+                IconName={isSecurityTextAtivePasswordConfirm ? 'visibility' : 'visibility-off'}
+                onPress={() => setIsSecurityTextAtivePasswordConfirm(!isSecurityTextAtivePasswordConfirm)}
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.passwordConfirm?.message}
@@ -196,6 +269,7 @@ export function SingUp(){
             title='Criar'
             variant="ghost"
             onPress={handleSubmit(handleSingUp)}
+            isLoading={isLoading}
             mt={6}
           />
         </VStack>

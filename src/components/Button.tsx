@@ -1,14 +1,17 @@
 import { Button as NativeBaseButton, IButtonProps, Text, Icon, HStack } from 'native-base'
 import { MaterialIcons } from '@expo/vector-icons'
 
+import { Loading } from './Loading'
+
 type props = IButtonProps & {
   title: string;
   variant?: 'outline' | 'ghost';
   haveIcon?: boolean;
   iconName?: string;
+  isLoading?: boolean;
 }
 
-export function Button({title, variant, haveIcon = false, iconName, ...rest}:props){
+export function Button({title, variant, haveIcon = false, isLoading = false, iconName, ...rest}:props){
   return (
     <NativeBaseButton 
       w="full"
@@ -20,30 +23,37 @@ export function Button({title, variant, haveIcon = false, iconName, ...rest}:pro
         bg: variant === "outline" ? "blue.700" : variant === "ghost" ? 'gray.600' : "gray.200"
       }}
       {...rest}
+      disabled={isLoading}
     >
-      <HStack alignItems="center">
-        {
-          haveIcon &&
-          <Icon
-            as={MaterialIcons}
-            name={iconName}
-            size={5}
-            borderBottomWidth={1}
-            borderColor="white"
-            color={ variant === 'outline' || variant === 'ghost' ? 'gray.100' : 'gray.700'}
-            mr={2}
-          />
-        }
-        <Text
-          fontFamily="body"
-          fontSize="sm"
-          color={ variant === "outline" ? "gray.100" : variant === "ghost" ? "white" : "gray.700"}
-          alignItems="center"
-        >
-          {title}
-        </Text>
-
-      </HStack>
+      {
+        isLoading ? 
+        <Loading />
+        :
+        <HStack alignItems="center">
+          
+          {
+            haveIcon &&
+            <Icon
+              as={MaterialIcons}
+              name={iconName}
+              size={5}
+              borderBottomWidth={1}
+              borderColor="white"
+              color={ variant === 'outline' || variant === 'ghost' ? 'gray.100' : 'gray.700'}
+              mr={2}
+            />
+          }
+          <Text
+            fontFamily="body"
+            fontSize="sm"
+            color={ variant === "outline" ? "gray.100" : variant === "ghost" ? "white" : "gray.700"}
+            alignItems="center"
+          >
+            {title}
+          </Text>
+        </HStack>
+      }
+      
     </NativeBaseButton>
   )
 }
