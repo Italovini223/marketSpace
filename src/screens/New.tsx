@@ -1,30 +1,106 @@
 import { useState } from 'react'
 import { Platform, TouchableOpacity } from 'react-native'
-import { HStack, Heading, ScrollView, VStack, useTheme, Text, TextArea, Radio, Stack, Switch, Checkbox } from "native-base";
+import { HStack, Heading, ScrollView, VStack, useTheme, Text, Radio, Stack, Switch, Checkbox, useToast } from "native-base";
 
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app.routes'
 
 import { ArrowLeft } from 'phosphor-react-native'
 
+import * as ImagePicker from 'expo-image-picker'
+
+import * as FileSystem from 'expo-file-system'
+
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup';
+
+import { useForm, Controller } from 'react-hook-form'
+
 import { ProductImageCard } from '@components/ProductImageCard';
 import { SelectProductImage } from '@components/SelectProductImage';
 import { Input } from '@components/Input';
 import { HeadingTopic } from '@components/HeadingTopic';
 import { Button } from '@components/Button';
+import { TextArea } from '@components/TextArea';
+
+
+type formDataProps = {
+  name: string;
+  description: string;
+}
+
+const saveProductSchema = yup.object({
+  name: yup.string().required('Informe o nome do produto'),
+  description: yup.string().required('Informe uma descrição para o produto').max(120, 'Limite de 120 caracteres'),
+})
 
 export function New(){
-  const [images, setImages] = useState(['https://s3-alpha-sig.figma.com/img/2b9d/0e16/12432335ff951fd0930c4fa7d271a8d5?Expires=1691366400&Signature=XiPh9ALBOtSoIsd3D87YAJc9lVScs9GK7zsTerKW0sRfKNTAaG0hoXD0ul88HcO2et9vHTX938Q9tc-Ak1x5~hxWt2H2g2mmdwluJ0dQwjBElqZdrK5W4Mzvt8IQp8~sW6j-7pet5AIcBjG~wDTPmKYCMgVRSn4fHSjSTFtm8JH0PtBWI8GMFX-Up51ObugYGPE1dVu2YCt9Lxfrh2M7IuQVRMvwiU2vJtp8ZBqmueIyn907R0pQQ5iaFoxw1mervzHdWHn0FN89uHol0~9cohcYbXPBuwsyFWy7adFYUro1o5jpdVK-fATr3G8JxoA7lorKy7CtiG~0CLnOjTX0Iw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4', 'https://s3-alpha-sig.figma.com/img/56a0/7e43/8d8a171dd0517c35b31d54312b139654?Expires=1691366400&Signature=cbYpGh8yRvzMUoCZKppUHnXYUCFbgZHoYka6OBzhlK3QJ50yPM66G-RLNWcsCIz6jr7huunlKIgifCfp14m5c71NiYxb~uUUYA5cqoqK4oYY7caAnKTydXAP-YPZfDHJyVO1KphgPE6cNIsaenkQSBwyAkgbkvnc7KhtPHFK2evDv0JehYmBtb64DZ2X17IDcglH1-laZD6Q0hbpHG8cadMl~ZVau3XxtzDdG3xBYrQBFXz7EIJEVlTVThCfQwiKkPbB6aGMy6oPPiP9Zc8VSOwBE0McnQI7zOBzY7TlSbXnbd57nnK2s8kpopEOtHm2dkSrpcBP8ntQE3R87Ko9tA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4'])
- const [paymentOptions, setPaymentOptions] = useState([])
+  const [images, setImages] = useState<string[]>([])
+  const [imagesFiles, setImagesFiles] = useState<any[]>([])
+  const [loadingImage, setLoadingImage] = useState(false)
+  const [paymentOptions, setPaymentOptions] = useState([])
+  const [accepted_trade, setAccepted_trade] = useState(false)
+
   const { sizes, colors } = useTheme()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
+
+  const { control, handleSubmit, formState:{errors} } = useForm<formDataProps>({
+    resolver: yupResolver(saveProductSchema)
+  })
+  
+  const toast = useToast()
 
   function handleBack(){
     navigation.navigate('home')
   }
 
-  function handleAdvance(){
-    navigation.navigate('preView')
+
+  async function handleProductImageSelect(){
+    try {
+      setLoadingImage(true)
+      const photoSelect = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true
+      })
+  
+      if(photoSelect.canceled){
+        return
+      }
+
+      const photoInfo = await FileSystem.getInfoAsync(photoSelect.assets[0].uri, { size: true})
+
+      if(photoInfo.exists && (photoInfo.size /1024 /1024) > 5){
+        toast.show({
+          title: 'Essa imagem e muito grande. Escolha uma ate 5MB',
+          placement: 'top',
+          bgColor: 'red.500'
+        })
+        return 
+      }
+
+      const fileExtension = photoSelect.assets[0].uri.split('.').pop();
+
+      const photoFile = {
+        name: `image_picture.${fileExtension}`,
+        uri: photoSelect.assets[0].uri,
+        type: `${photoSelect.assets[0].uri}/${fileExtension}`
+      }
+
+      setImagesFiles([[...imagesFiles, photoFile]]);
+      setImages([...images, photoSelect.assets[0].uri])
+
+    } catch (error){
+      console.log(error)
+    } finally {
+      setLoadingImage(false)
+    }
+  }
+
+  async function handleSaveProduct({ description, name }: formDataProps){
+    console.log(paymentOptions)
+    console.log(accepted_trade)
   }
 
   return(
@@ -60,32 +136,50 @@ export function New(){
                   images &&
                   images.map((image) => (
                     <ProductImageCard 
-                      source={{uri: image}}
+                      uri={image}
                       description='teste'
                       onPress={() => console.log('clicou')}
+                      isLoading={loadingImage}
                       key={image}
                     />
                   ))
                 }
-                <SelectProductImage />
+                {
+                  images.length < 3 && 
+                  <SelectProductImage 
+                    onPress={handleProductImageSelect}
+                  />
+                }
               </HStack>
             </VStack>
 
             <VStack mt={8}>
               <HeadingTopic title='Sobre o produto'/>
-              <Input 
-                variant="white"
-                placeholder='Nome do produto'
+              <Controller 
+                control={control}
+                name='name'
+                render={({field:{onChange, value}}) => (
+                  <Input 
+                    variant="white"
+                    placeholder='Nome do produto'
+                    onChangeText={onChange}
+                    value={value}
+                    errorMessage={errors.name?.message}
+                  />
+
+                )}
               />
-              <TextArea 
-                h={40}
-                bg="white"
-                borderWidth={0}
-                rounded="md"
-                color="gray.400"
-                fontSize="md"
-                placeholder="Descrição do produto"
-                autoCompleteType={false}
+              <Controller 
+                control={control}
+                name='description'
+                render={({field:{onChange, value}}) => (
+                  <TextArea 
+                    onChangeText={onChange}
+                    value={value}
+                    errorMessage={errors.description?.message}
+                  />
+
+                )}
               />
 
             <Radio.Group
@@ -121,11 +215,13 @@ export function New(){
               />
             </VStack>
 
-            <VStack mt={2}>
+            <VStack mt={2} position="relative">
               <HeadingTopic title='Aceita troca?'/>
               <Switch 
                 size="md"
-                
+                position="absolute"
+                top={3}
+                onValueChange={() => setAccepted_trade(!accepted_trade)}
               />
             </VStack>
             <VStack mt={4}>
@@ -152,7 +248,7 @@ export function New(){
               title='Avançar'
               variant="ghost"
               w="50%"
-              onPress={handleAdvance}
+              onPress={handleSubmit(handleSaveProduct)}
             />
         </HStack>
     </VStack>

@@ -14,7 +14,7 @@ export function SelectProductImage({...rest}: IPressableProps){
       alignItems="center"
       justifyContent="center"
       _pressed={{
-        bg: 'gray.400'
+        bg: 'gray.500'
       }}
       {...rest}
     >

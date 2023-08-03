@@ -4,6 +4,7 @@ export type productDto = {
   is_new: boolean;
   price: number;
   accepted_trade: boolean;
-  paymethods: string[];
+  payment_methods: string[];
+  images: any[];
 
 }

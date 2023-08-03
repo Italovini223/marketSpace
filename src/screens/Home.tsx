@@ -1,16 +1,54 @@
-import { useState } from "react"
+import { useCallback, useState } from "react"
 
-import { VStack, Text, FlatList } from "native-base"
+import { api } from "@services/api"
+
+import { productDto } from '@dtos/productDto'
+
+import { AppError } from "@utils/appError"
+
+import { useFocusEffect } from "@react-navigation/native"
+
+import { VStack, Text, FlatList, useToast } from "native-base"
 
 import { ActiveAds } from "@components/ActiveAds"
 import { HomeHeader } from "@components/HomeHeader"
 import { Input } from "@components/Input"
 import { ProductCard } from "@components/ProductCard"
+import { Loading } from "@components/Loading"
 
 
 
 export function Home(){
-  const [products, setProducts] = useState([1, 2, 3, 4, 5, 6, 7, 8])
+  const [products, setProducts] = useState<productDto[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const toast = useToast()
+
+  async function fetchProducts(){
+    try {
+      setIsLoading(true)
+      const response = await api.get('/products')
+
+      console.log(response)
+
+    } catch (error){
+      const isAppError = error instanceof AppError
+
+      const title = isAppError ? error.message : 'Nao foi possível carregar os produtos'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    }finally {
+      setIsLoading(false)
+    }
+  }
+
+  useFocusEffect(useCallback(() => {
+    fetchProducts()
+  }, []))
 
 
   return (
@@ -37,11 +75,19 @@ export function Home(){
 
         <VStack flex={1} alignItems="center">
           {
+            isLoading ?
+            <Loading />
+            :
             products.length < 2 ? 
               <FlatList 
                   data={products}
                   keyExtractor={item => String(item)}
                   flexDirection="row"
+                  ListEmptyComponent={() => (
+                    <Text fontFamily="heading" fontSize="md" color="gray.700" >
+                      Ainda nao ha produtos cadastrados
+                    </Text>
+                  )}
                   renderItem={({item}) => (
                     <ProductCard 
                       isLoading={false}
