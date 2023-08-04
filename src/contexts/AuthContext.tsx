@@ -4,7 +4,7 @@ import { userDto } from "@dtos/userDto";
 
 import { api } from "@services/api";
 
-import { storageUserSave, storageUserGet } from '@storage/storageUser'
+import { storageUserSave, storageUserGet, storageUserRemove } from '@storage/storageUser'
 import { storageAuthTokenSave, storageAuthTokenGet } from '@storage/storageAuthToken'
 
 type AuthContextProviderProps = {
@@ -14,6 +14,7 @@ type AuthContextProviderProps = {
 type AuthContextDataProps = {
   user: userDto;
   singIn: (email: string, password: string) => Promise<void>;
+  singOut: () => Promise<void>
   isLoadingUserData: boolean;
 }
 
@@ -79,6 +80,15 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
     }
   }
 
+  async function singOut(){
+    try {
+      setUser({} as userDto)
+      await storageUserRemove()
+    } catch(error){
+      throw error
+    }
+  }
+
   useEffect(() => {
     loadUserData()
   }, [])
@@ -88,7 +98,8 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
       value={{
         user,
         singIn,
-        isLoadingUserData
+        isLoadingUserData,
+        singOut,
       }}
     >
       {children}

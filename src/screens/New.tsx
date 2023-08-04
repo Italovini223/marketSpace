@@ -1,9 +1,12 @@
 import { useState } from 'react'
+
 import { Platform, TouchableOpacity } from 'react-native'
 import { HStack, Heading, ScrollView, VStack, useTheme, Text, Radio, Stack, Switch, Checkbox, useToast } from "native-base";
 
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app.routes'
+
+import { useProduct } from '@hooks/useProduct';
 
 import { ArrowLeft } from 'phosphor-react-native'
 
@@ -48,6 +51,7 @@ export function New(){
 
   const { sizes, colors } = useTheme()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
+  const { saveProduct } = useProduct()
 
   const { control, handleSubmit, formState:{errors} } = useForm<formDataProps>({
     resolver: yupResolver(saveProductSchema)
@@ -118,6 +122,20 @@ export function New(){
     imagesFiles.map(imageFile => {
       productForm.append('images', imageFile)
     })
+
+    const product = {
+      name,
+      description,
+      price: priceNumber,
+      payment_methods: paymentOptions,
+      accepted_trade,
+      is_new: isNew === 'new' ? true : false,
+      images: imagesFiles
+    }
+
+    await saveProduct(product)
+
+
 
   }
 

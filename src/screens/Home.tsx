@@ -2,6 +2,8 @@ import { useCallback, useState } from "react"
 
 import { api } from "@services/api"
 
+import { useAuth } from '@hooks/useAuth'
+
 import { productDto } from '@dtos/productDto'
 
 import { AppError } from "@utils/appError"
@@ -22,6 +24,7 @@ export function Home(){
   const [products, setProducts] = useState<productDto[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const { singOut } = useAuth()
   const toast = useToast()
 
   async function fetchProducts(){
@@ -41,6 +44,10 @@ export function Home(){
         placement: 'top',
         bgColor: 'red.500'
       })
+
+      if(title === 'token.invalid'){
+        singOut()
+      }
     }finally {
       setIsLoading(false)
     }
