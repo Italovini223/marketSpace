@@ -27,19 +27,24 @@ import { TextArea } from '@components/TextArea';
 type formDataProps = {
   name: string;
   description: string;
+  price: string;
 }
+
+const priceRegex = /(([1-9]\d{0,2}(\.\d{3})*)|(([1-9]\.\d*)?\d))(\,\d\d)/
 
 const saveProductSchema = yup.object({
   name: yup.string().required('Informe o nome do produto'),
   description: yup.string().required('Informe uma descrição para o produto').max(120, 'Limite de 120 caracteres'),
+  price: yup.string().required('Informe um preço').matches(priceRegex, 'Informe um valor valido')
 })
 
 export function New(){
   const [images, setImages] = useState<string[]>([])
   const [imagesFiles, setImagesFiles] = useState<any[]>([])
   const [loadingImage, setLoadingImage] = useState(false)
-  const [paymentOptions, setPaymentOptions] = useState([])
+  const [paymentOptions, setPaymentOptions] = useState<string[]>([])
   const [accepted_trade, setAccepted_trade] = useState(false)
+  const [isNew, setIsNew] = useState('')
 
   const { sizes, colors } = useTheme()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
@@ -98,9 +103,22 @@ export function New(){
     }
   }
 
-  async function handleSaveProduct({ description, name }: formDataProps){
+  async function handleSaveProduct({ description, name, price }: formDataProps){
     console.log(paymentOptions)
     console.log(accepted_trade)
+    console.log(isNew)
+
+    const priceWithoutComma = price.replace(/,/g, '');
+    const priceNumber = parseFloat(priceWithoutComma);
+
+    console.log(priceNumber)
+
+    const productForm = new FormData()
+
+    imagesFiles.map(imageFile => {
+      productForm.append('images', imageFile)
+    })
+
   }
 
   return(
@@ -186,6 +204,8 @@ export function New(){
               name='productStyle'
               defaultValue='new'
               flexDirection="row"
+              value={isNew}
+              onChange={value => setIsNew(value)}
             >
               <Stack
                 direction={{
@@ -209,9 +229,20 @@ export function New(){
 
             <VStack mt={8}>
               <HeadingTopic title='Valor R$'/>
-              <Input 
-                variant="white"
-                placeholder='Digite o valor do produto'
+              <Controller 
+                control={control}
+                name='price'
+                render={({field:{value,onChange}}) => (
+                  <Input 
+                    variant="white"
+                    placeholder='Digite o valor do produto'
+                    keyboardType='number-pad'
+                    value={value}
+                    onChangeText={onChange}
+                    errorMessage={errors.price?.message}
+
+                  />
+                )}
               />
             </VStack>
 

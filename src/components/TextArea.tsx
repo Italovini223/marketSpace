@@ -12,16 +12,17 @@ export function TextArea({ errorMessage, isInvalid, ...rest}: props){
       mb={4}
     >
       <NativeBaseTextArea 
-        h={40}
         bg="white"
+        h={40}
         borderWidth={0}
         rounded="md"
-        color="gray.400"
+        placeholderTextColor="gray.400"
         fontSize="md"
         placeholder="Descrição do produto"
         autoCompleteType={false}
+        isInvalid={invalid}
         _invalid={{
-          borderWidth: 2,
+          borderWidth: 1,
           borderColor: 'red.500'
         }}
         {...rest}
