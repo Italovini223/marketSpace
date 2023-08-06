@@ -17,6 +17,8 @@ import * as FileSystem from 'expo-file-system'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import { storageProductImagesSave } from '@storage/storageProductImage'
+
 import { useForm, Controller } from 'react-hook-form'
 
 import { ProductImageCard } from '@components/ProductImageCard';
@@ -46,7 +48,7 @@ export function New(){
   const [imagesFiles, setImagesFiles] = useState<any[]>([])
   const [loadingImage, setLoadingImage] = useState(false)
   const [paymentOptions, setPaymentOptions] = useState<string[]>([])
-  const [accepted_trade, setAccepted_trade] = useState(false)
+  const [ accept_trade, setAccept_trade] = useState(false)
   const [isNew, setIsNew] = useState('')
 
   const { sizes, colors } = useTheme()
@@ -56,6 +58,7 @@ export function New(){
   const { control, handleSubmit, formState:{errors} } = useForm<formDataProps>({
     resolver: yupResolver(saveProductSchema)
   })
+
   
   const toast = useToast()
 
@@ -109,7 +112,7 @@ export function New(){
 
   async function handleSaveProduct({ description, name, price }: formDataProps){
     console.log(paymentOptions)
-    console.log(accepted_trade)
+    console.log( accept_trade)
     console.log(isNew)
 
     const priceWithoutComma = price.replace(/,/g, '');
@@ -117,23 +120,22 @@ export function New(){
 
     console.log(priceNumber)
 
-    const productForm = new FormData()
-
-    imagesFiles.map(imageFile => {
-      productForm.append('images', imageFile)
-    })
 
     const product = {
       name,
       description,
       price: priceNumber,
       payment_methods: paymentOptions,
-      accepted_trade,
+       accept_trade,
       is_new: isNew === 'new' ? true : false,
-      images: imagesFiles
+      images: imagesFiles,
     }
 
+    await storageProductImagesSave(images)
+
     await saveProduct(product)
+
+    navigation.navigate('preView')
 
 
 
@@ -254,7 +256,7 @@ export function New(){
                   <Input 
                     variant="white"
                     placeholder='Digite o valor do produto'
-                    keyboardType='number-pad'
+                    keyboardType='numbers-and-punctuation'
                     value={value}
                     onChangeText={onChange}
                     errorMessage={errors.price?.message}
@@ -269,8 +271,8 @@ export function New(){
               <Switch 
                 size="md"
                 position="absolute"
-                top={3}
-                onValueChange={() => setAccepted_trade(!accepted_trade)}
+                top={ Platform.OS === 'android' ? 3 : 5}
+                onValueChange={() => setAccept_trade(! accept_trade)}
               />
             </VStack>
             <VStack mt={4}>
@@ -278,9 +280,9 @@ export function New(){
               <Checkbox.Group onChange={setPaymentOptions} value={paymentOptions}>
                 <Checkbox value='boleto' mb={3}>Boleto</Checkbox>
                 <Checkbox value='pix' mb={3}>Pix</Checkbox>
-                <Checkbox value='dinheiro' mb={3}>Dinheiro</Checkbox>
-                <Checkbox value='credito' mb={3}>Cartão de Crédito</Checkbox>
-                <Checkbox value='deposito' mb={3}>Depósito Bancário</Checkbox>
+                <Checkbox value='cash' mb={3}>Dinheiro</Checkbox>
+                <Checkbox value='card' mb={3}>Cartão de Crédito</Checkbox>
+                <Checkbox value='deposit' mb={3}>Depósito Bancário</Checkbox>
               </Checkbox.Group>
             </VStack>
           </VStack>

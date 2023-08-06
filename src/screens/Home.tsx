@@ -32,7 +32,7 @@ export function Home(){
       setIsLoading(true)
       const response = await api.get('/products')
 
-      console.log(response)
+      console.log("PRODUTOS =>", response.data)
 
     } catch (error){
       const isAppError = error instanceof AppError

@@ -1,8 +1,9 @@
 import { Platform } from "react-native";
 import { createBottomTabNavigator, BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator as StackNavigator } from "@react-navigation/native-stack";
 
 import { useTheme } from "native-base";
+
+import { useAuth } from "@hooks/useAuth";
 
 import { Home } from "@screens/Home";
 import { Product } from "@screens/Product";
@@ -11,6 +12,9 @@ import { New } from "@screens/New";
 import { PreView } from "@screens/PreView";
 
 import { House, Tag, SignOut } from 'phosphor-react-native'
+import { useEffect } from "react";
+import { Loading } from "@components/Loading";
+import { color } from "native-base/lib/typescript/theme/styled-system";
 
 type AppRoutes = {
   home: undefined;
@@ -19,11 +23,13 @@ type AppRoutes = {
   logout: undefined;
   new: undefined;
   preView: undefined
+  singOut: undefined;
 }
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutes>
 export function AppRoutes(){
   const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>()
+
   
 
   const { sizes, colors } = useTheme()
@@ -101,6 +107,29 @@ export function AppRoutes(){
           tabBarStyle: {
             display: 'none'
           }
+        }}
+      />
+
+      <Screen 
+        name="singOut"
+        component={() => {
+          const { singOut } = useAuth()
+          useEffect(() => {
+            const getOut = async () => {
+              await singOut()
+            }
+            getOut()
+          }, [])
+
+          return <Loading />
+        }}  
+        options={{
+          tabBarIcon: () => (
+            <SignOut 
+              size={iconsSize}
+              color={colors.orange[500]}
+            />
+          )
         }}
       />
 

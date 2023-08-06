@@ -1,11 +1,16 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import { AppNavigatorRoutesProps } from '@routes/app.routes'
 
 import { Dimensions } from 'react-native'
 
-import { HStack, ScrollView, useTheme, Skeleton, VStack, Text, Box, Heading } from "native-base";
+import { useProduct } from '@hooks/useProduct'
+import { useAuth } from '@hooks/useAuth'
+
+import { storageProductImagesGet } from '@storage/storageProductImage'
+
+import { HStack, ScrollView, useTheme, useToast, VStack, Text, Box, Heading } from "native-base";
 import Carousel from 'react-native-reanimated-carousel';
 
 import { CarouselImage } from '@components/CarouselImage';
@@ -13,20 +18,60 @@ import { CarouselImage } from '@components/CarouselImage';
 import { UserPhoto } from '@components/UserPhoto';
 import { PayMethodCard } from '@components/PayMethodCard';
 import { Button } from '@components/Button';
+import { api } from '@services/api'
+import { AppError } from '@utils/appError'
 
 export function PreView(){
-  const [images, setImages] = useState(['https://s3-alpha-sig.figma.com/img/2b9d/0e16/12432335ff951fd0930c4fa7d271a8d5?Expires=1691366400&Signature=XiPh9ALBOtSoIsd3D87YAJc9lVScs9GK7zsTerKW0sRfKNTAaG0hoXD0ul88HcO2et9vHTX938Q9tc-Ak1x5~hxWt2H2g2mmdwluJ0dQwjBElqZdrK5W4Mzvt8IQp8~sW6j-7pet5AIcBjG~wDTPmKYCMgVRSn4fHSjSTFtm8JH0PtBWI8GMFX-Up51ObugYGPE1dVu2YCt9Lxfrh2M7IuQVRMvwiU2vJtp8ZBqmueIyn907R0pQQ5iaFoxw1mervzHdWHn0FN89uHol0~9cohcYbXPBuwsyFWy7adFYUro1o5jpdVK-fATr3G8JxoA7lorKy7CtiG~0CLnOjTX0Iw__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4', 'https://s3-alpha-sig.figma.com/img/56a0/7e43/8d8a171dd0517c35b31d54312b139654?Expires=1691366400&Signature=cbYpGh8yRvzMUoCZKppUHnXYUCFbgZHoYka6OBzhlK3QJ50yPM66G-RLNWcsCIz6jr7huunlKIgifCfp14m5c71NiYxb~uUUYA5cqoqK4oYY7caAnKTydXAP-YPZfDHJyVO1KphgPE6cNIsaenkQSBwyAkgbkvnc7KhtPHFK2evDv0JehYmBtb64DZ2X17IDcglH1-laZD6Q0hbpHG8cadMl~ZVau3XxtzDdG3xBYrQBFXz7EIJEVlTVThCfQwiKkPbB6aGMy6oPPiP9Zc8VSOwBE0McnQI7zOBzY7TlSbXnbd57nnK2s8kpopEOtHm2dkSrpcBP8ntQE3R87Ko9tA__&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4'])
+  const [images, setImages] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isMyProduct, setIsMyProduct] = useState(true)
-  const [isActive, setIsActive] = useState(true)
-  const [payMethods, setPayMethods] = useState(['pix', 'dinheiro', 'deposito'])
-  const { sizes, colors } = useTheme()
+  const { sizes } = useTheme()
+  const { product, createProduct } = useProduct()
+  const { user } = useAuth()
+  const toast = useToast()
 
   const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   function handleBack(){
     navigation.navigate('new')
   } 
+
+  async function fetchImagesPreview(){
+    const imagesPreview = await storageProductImagesGet()
+    setImages(imagesPreview)
+  }
+
+  async function handleNewProduct(){
+    try {
+      setIsLoading(true)
+      await createProduct(product)
+      
+      toast.show({
+        title: 'Produto criado com sucesso',
+        placement: 'top',
+        bgColor: 'success.500'       
+      })
+
+      setIsLoading(false)
+      navigation.navigate('home')
+
+    } catch(error){
+      const isAppError = error instanceof AppError
+
+      const title = isAppError ? error.message : 'nao foi possível criar o produto!'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useFocusEffect(useCallback(() => {
+    fetchImagesPreview()
+  }, []))
 
   return(
     <VStack flex={1} bg="gray.200"> 
@@ -39,15 +84,7 @@ export function PreView(){
             É assim que seu produto vai aparecer!
           </Text>
         </VStack>
-        { 
-          isLoading ?
-          <Skeleton 
-            w="full"
-            h={72}
-            startColor="gray.400"
-            endColor="gray.300"
-          />
-          :
+ 
           <Carousel 
             data={images}
             width={Dimensions.get('window').width}
@@ -61,13 +98,13 @@ export function PreView(){
               />
             )}
           />
-        }
+   
 
         <VStack flex={1} mx={6} mt={4}> 
           <HStack alignItems="center">
             <UserPhoto 
               size={6}
-              source={{uri: 'https://github.com/italovini223.png'}}
+              source={{uri: `${api.defaults.baseURL}/images/${user.avatar}`}}
               alt='user foto'
               mr={2}
             />
@@ -76,7 +113,7 @@ export function PreView(){
               fontSize="sm"
               color="gray.700"
             >
-              Ítalo Vinícius
+             {user.name}
             </Text>
           </HStack>
 
@@ -89,7 +126,9 @@ export function PreView(){
             alignItems="center"
             mt={6}
           >
-            <Text>Usado</Text>
+            <Text>
+              {product.is_new ? "Novo" : "Usado"}
+            </Text>
           </Box>
 
           <HStack 
@@ -102,7 +141,7 @@ export function PreView(){
               fontSize="lg"
               color="gray.700"
             >
-              Bicicleta
+              {product.name}
             </Heading>
 
             <HStack>
@@ -118,7 +157,7 @@ export function PreView(){
                 fontFamily="heading"
                 color="blue.500"
               >
-                49,99
+                {product.price}
               </Heading>
             </HStack>
           </HStack>
@@ -133,7 +172,7 @@ export function PreView(){
               fontFamily="body"
               color="gray.600"
             >
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure corrupti eum, totam soluta vel molestiae veniam optio ipsam ipsum, magni beatae suscipit quas quo quos repellendus laboriosam ducimus rerum repudiandae.
+             {product.description}
             </Text>
           </Box>
 
@@ -147,7 +186,7 @@ export function PreView(){
               
             >
               <Text fontSize="sm" fontFamily="heading" color="gray.600" mr={2}>Aceita troca?</Text>
-              <Text fontFamily="body" fontSize="sm" color="gray.600">Sim</Text>
+              <Text fontFamily="body" fontSize="sm" color="gray.600">{product. accept_trade? "sim" : 'Nao'}</Text>
             </HStack>
 
             <VStack flex={1} my={4}>
@@ -159,7 +198,7 @@ export function PreView(){
                 Modelos de pagamento:
               </Text>
               {
-                payMethods.map( (payMethod, index) => (
+                product.payment_methods.map((payMethod, index) => (
                   <PayMethodCard 
                     payMethod={payMethod}
                     key={index}
@@ -187,6 +226,8 @@ export function PreView(){
             iconName='local-offer'
             w='50%'
             variant="outline"
+            isLoading={isLoading}
+            onPress={handleNewProduct}
           />
       </HStack>
     </VStack>

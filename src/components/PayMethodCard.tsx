@@ -24,7 +24,7 @@ export function PayMethodCard({ payMethod }: PayMethodProps){
           size={iconSize}
           color={iconsColor}
         />
-        : payMethod === 'dinheiro'?
+        : payMethod === 'cash'?
         <Money 
           size={iconSize}
           color={iconsColor}
