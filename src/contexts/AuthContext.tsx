@@ -91,7 +91,6 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
 
   useEffect(() => {
     loadUserData()
-    singOut()
   }, [])
 
   return (
