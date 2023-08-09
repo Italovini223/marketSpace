@@ -81,7 +81,7 @@ export function Home(){
       setIsLoading(true)
       const response = await api.get('/products')
 
-      console.log("PRODUTOS =>", response.data)
+      setProducts(response.data)
 
     } catch (error){
       const isAppError = error instanceof AppError
@@ -206,6 +206,7 @@ export function Home(){
                   renderItem={({item}) => (
                     <ProductCard 
                       isLoading={false}
+                      product={item}
                     />
                   )}
               />
@@ -223,6 +224,7 @@ export function Home(){
                 renderItem={({item}) => (
                   <ProductCard 
                     isLoading={false}
+                    product={item}
                   />
               )}
             />

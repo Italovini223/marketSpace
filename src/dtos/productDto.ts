@@ -7,5 +7,8 @@ export type productDto = {
   accept_trade: boolean;
   payment_methods: string[];
   images: any[];
+  user?:{
+    avatar: string;
+  }
 
 }

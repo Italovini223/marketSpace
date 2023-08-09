@@ -100,7 +100,7 @@ export function New(){
         type: `${photoSelect.assets[0].uri}/${fileExtension}`
       }
 
-      setImagesFiles([[...imagesFiles, photoFile]]);
+      setImagesFiles([...imagesFiles, photoFile]);
       setImages([...images, photoSelect.assets[0].uri])
 
     } catch (error){
@@ -124,7 +124,7 @@ export function New(){
     const product = {
       name,
       description,
-      price: priceNumber,
+      price: priceNumber/10,
       payment_methods: paymentOptions,
        accept_trade,
       is_new: isNew === 'new' ? true : false,

@@ -51,10 +51,10 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
 
       const productImagesForm = new FormData()
 
-      images.forEach((item) => {
+      images.forEach(item => {
         const imageFile = {
           ...item,
-          name:  user.name + '.' + item.name,
+          name: data.name + '.' + item.name
         } as any
 
         productImagesForm.append("images", imageFile)
@@ -62,7 +62,6 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
 
       productImagesForm.append("product_id", data.id)
 
-      console.log(images)
 
       await api.post('/products/images', productImagesForm, {
         headers: {
