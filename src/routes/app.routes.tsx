@@ -18,7 +18,7 @@ import { color } from "native-base/lib/typescript/theme/styled-system";
 
 type AppRoutes = {
   home: undefined;
-  product: { product_id: string};
+  product: { id: string};
   myProducts: undefined;
   logout: undefined;
   new: undefined;

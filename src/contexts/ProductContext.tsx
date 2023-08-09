@@ -7,6 +7,7 @@ import { productDto } from '@dtos/productDto'
 import { api } from "@services/api";
 
 import { storageProductSave, storageProductGet } from '@storage/storageProduct'
+import { string } from "yup";
 
 
 type ProductContextDataPros = {
@@ -38,7 +39,7 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
     
   }
 
-  async function createProduct({ name, price, accept_trade, payment_methods, description, is_new, images}: productDto){
+  async function createProduct({ name, price, accept_trade, payment_methods, description, is_new, product_images}: productDto){
     try {
       const {data} = await api.post('/products', {
         name,
@@ -51,7 +52,7 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
 
       const productImagesForm = new FormData()
 
-      images.forEach(item => {
+      product_images.forEach(item => {
         const imageFile = {
           ...item,
           name: data.name + '.' + item.name

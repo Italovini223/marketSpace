@@ -40,7 +40,7 @@ export function ProductCard({ isLoading, is_active = true, product:{id, name, is
   const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   function handleProduct(){
-    navigation.navigate('product', { product_id: id})
+    navigation.navigate('product', {id})
     console.log(product_images[0].path)
   }
   return(

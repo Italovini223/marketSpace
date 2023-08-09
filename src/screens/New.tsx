@@ -128,7 +128,7 @@ export function New(){
       payment_methods: paymentOptions,
        accept_trade,
       is_new: isNew === 'new' ? true : false,
-      images: imagesFiles,
+      product_images: imagesFiles,
     }
 
     await storageProductImagesSave(images)
