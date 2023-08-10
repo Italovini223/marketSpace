@@ -2,7 +2,11 @@ import { HStack, Heading, VStack, Text, Icon } from "native-base";
 import { TouchableOpacity } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 
-export function ActiveAds(){
+type props = {
+  myProducts: number;
+}
+
+export function ActiveAds({ myProducts }: props){
   return(
     <HStack w="full" h={16} bg="blue.100"  alignItems="center" mt={2} px={5} borderRadius={4}>
       <Icon 
@@ -14,7 +18,7 @@ export function ActiveAds(){
       />
       <VStack color="gray.700" flex={1} >
         <Heading fontSize="lg" fontFamily="heading">
-          4
+          {myProducts}
         </Heading>
         <Text fontSize="xs" fontFamily="body">
           anúncios ativos

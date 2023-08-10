@@ -1,47 +1,28 @@
-import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app.routes'
 
+import { useAuth } from '@hooks/useAuth';
+
 import { TouchableOpacity, TouchableOpacityProps } from 'react-native'
-import { Box, HStack, Image, VStack, Text, Skeleton, useTheme } from "native-base";
-import ImgExample from '@assets/Image.png'
+import { Box, HStack, Image, VStack, Text, Skeleton } from "native-base";
 import { UserPhoto } from "./UserPhoto";
 import { api } from '@services/api';
-
-type imageProductDataPros = {
-  path: string;
-  id: string;
-}
-
-type payMethodsDataProps = {
-  key: string;
-  name: string;
-}
-
-type imageProductUserProps = {
-  avatar: string;
-}
+import { productResponseDto } from '@dtos/productResponseDto';
 
 type Props = TouchableOpacityProps & {
   isLoading: boolean;
-  is_active?: boolean;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    is_new: boolean;
-    accept_trade: boolean;
-    product_images: imageProductDataPros[];
-    user: imageProductUserProps
-  };
+  product: productResponseDto;
 }
-export function ProductCard({ isLoading, is_active = true, product:{id, name, is_new, accept_trade, price, product_images, user} }: Props){
+export function ProductCard({ isLoading, product }: Props){
 
   const navigation = useNavigation<AppNavigatorRoutesProps>()
+  const { user } = useAuth()
+
+  const isMyProduct = product.user?.user_id === user.id || product.user_id === user.id
+  const isActive = product.is_active?  product.is_active === true ?  true : false : true
 
   function handleProduct(){
-    navigation.navigate('product', {id})
-    console.log(product_images[0].path)
+    navigation.navigate('product', {id: product.id})
   }
   return(
     <>
@@ -56,40 +37,40 @@ export function ProductCard({ isLoading, is_active = true, product:{id, name, is
           endColor="gray.200"
         />
         :
-        <TouchableOpacity style={{width: 155, marginRight: 5, marginBottom: 24,}} onPress={handleProduct} key={id}>
+        <TouchableOpacity style={{width: 155, marginRight: 5, marginBottom: 24,}} onPress={handleProduct} key={product.id}>
           <Box>
             <Image 
-              source={{uri: `${api.defaults.baseURL}/images/${product_images[0].path}`}}
+              source={{uri: `${api.defaults.baseURL}/images/${product.product_images[0].path}`}}
               alt='Imagem do produto'
               resizeMode="cover"
               position="absolute"
               borderRadius={10}
               h="24"
               w="full"
-              blurRadius={is_active ? 0 : 10}
+              blurRadius={isActive? 0 : 10}
               borderColor="gray.500"
             />
   
             <HStack justifyContent="space-between" mt={1} px={1}>
               <UserPhoto 
-                source={{uri: `${api.defaults.baseURL}/images/${user?.avatar}`}}
+                source={{uri: `${api.defaults.baseURL}/images/${isMyProduct? user.avatar : product.user?.avatar}`}}
                 alt='foto do usuário'
                 size={6}
               />
   
               <Box 
-                bg={is_new ? "blue.700" : "gray.600"}
+                bg={product.is_new ? "blue.700" : "gray.600"}
                 rounded="full"
                 textAlign="center"
                 px={2}
               >
                 <Text color="white" fontSize="xs">
-                  {is_new? 'Novo' : 'Usado'}
+                  {product.is_new? 'Novo' : 'Usado'}
                 </Text>
               </Box>
             </HStack>
             {
-              !is_active &&
+              !isActive ?
               <Text 
                 position="relative" 
                 bottom={-40} 
@@ -100,18 +81,20 @@ export function ProductCard({ isLoading, is_active = true, product:{id, name, is
               >
                 Anúncio desativado
               </Text>
+              :
+              undefined
             }
           </Box>
           <VStack position="relative" pt={20}>
-            <Text fontSize="sm" fontFamily="body" color={ is_active ?"gray.600" : "gray.400"}>
-              {name}
+            <Text fontSize="sm" fontFamily="body" color={ isActive ?"gray.600" : "gray.400"}>
+              {product.name}
             </Text>
             <HStack>
-              <Text fontSize="sm" fontFamily="heading" color={ is_active ?"gray.600" : "gray.400"}>
+              <Text fontSize="sm" fontFamily="heading" color={ isActive ?"gray.600" : "gray.400"}>
                 R$
               </Text>
-              <Text fontSize="lg" fontFamily="heading" color={ is_active ?"gray.600" : "gray.400"}>
-                {price}
+              <Text fontSize="lg" fontFamily="heading" color={isActive ?"gray.600" : "gray.400"}>
+                {product.price.toLocaleString("pt-br")}
               </Text>
             </HStack>
           </VStack>

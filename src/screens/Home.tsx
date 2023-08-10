@@ -8,7 +8,6 @@ import { useForm, Controller } from 'react-hook-form'
 import * as yup from 'yup'
 import { yupResolver } from "@hookform/resolvers/yup"
 
-import { productDto } from '@dtos/productDto'
 
 import { AppError } from "@utils/appError"
 
@@ -25,6 +24,7 @@ import { ProductCard } from "@components/ProductCard"
 import { Loading } from "@components/Loading"
 import { HeadingTopic } from "@components/HeadingTopic"
 import { Button } from "@components/Button"
+import { productResponseDto } from "@dtos/productResponseDto"
 
 
 type FormDataProps = {
@@ -33,7 +33,8 @@ type FormDataProps = {
 
 
 export function Home(){
-  const [products, setProducts] = useState<productDto[]>([])
+  const [products, setProducts] = useState<productResponseDto[]>([])
+  const [myProducts, setMyProducts] = useState<productResponseDto[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [is_new, setIs_new] = useState(true)
@@ -45,7 +46,7 @@ export function Home(){
     "deposit",
     "card",
   ])
-  const { singOut } = useAuth()
+  const { singOut, user } = useAuth()
   const toast = useToast()
 
   const {sizes, colors} = useTheme()
@@ -102,6 +103,26 @@ export function Home(){
     }
   }
 
+  async function fetchMyProducts(){
+    try {
+      setIsLoading(true)
+      const response = await api.get('/users/products')
+      setMyProducts(response.data)
+    }catch(error){
+      console.log(error)
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : 'Nao foi possivel carregar seus produtos'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   async function handleApplyFilter({ search }: FormDataProps){
     try {
       setIsLoading(true)
@@ -133,6 +154,7 @@ export function Home(){
 
   useFocusEffect(useCallback(() => {
     fetchProducts()
+    fetchMyProducts()
   }, []))
 
 
@@ -145,7 +167,9 @@ export function Home(){
           <Text color="gray.500" fontFamily="body" >
             Seus produtos anunciados para venda 
           </Text>
-          <ActiveAds />
+          <ActiveAds 
+            myProducts={myProducts.length}
+          />
         </VStack>
 
         <VStack>

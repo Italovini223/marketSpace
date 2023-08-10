@@ -6,7 +6,7 @@ import { productDto } from '@dtos/productDto'
 
 import { api } from "@services/api";
 
-import { storageProductSave, storageProductGet } from '@storage/storageProduct'
+import { storageProductSave, storageProductGet, storageProductDelete } from '@storage/storageProduct'
 import { string } from "yup";
 
 
@@ -26,7 +26,7 @@ export const ProductContext = createContext<ProductContextDataPros>({} as Produc
 
 export function ProductContextProvider({children}: ProductContextProviderProps){
   const [product, setProduct] = useState<productDto>({} as productDto)
-  const { user } = useAuth()
+  
 
   async function saveProduct(product: productDto){
     await storageProductSave(product)
@@ -39,7 +39,7 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
     
   }
 
-  async function createProduct({ name, price, accept_trade, payment_methods, description, is_new, product_images}: productDto){
+  async function createProduct({ name, price, accept_trade, payment_methods, description, is_new, images}: productDto){
     try {
       const {data} = await api.post('/products', {
         name,
@@ -52,7 +52,8 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
 
       const productImagesForm = new FormData()
 
-      product_images.forEach(item => {
+
+      images.forEach(item => {
         const imageFile = {
           ...item,
           name: data.name + '.' + item.name
@@ -69,6 +70,8 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
           "Content-Type": "multipart/form-data",
         }
       })
+
+      storageProductDelete()
 
     } catch (error) {
       throw error

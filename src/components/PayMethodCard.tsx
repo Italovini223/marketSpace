@@ -3,13 +3,14 @@ import { HStack, useTheme, Text } from "native-base";
 
 
 type PayMethodProps = {
-  paymentMethod: {
+  paymentMethod?: {
     key: string;
     name: string;
   }
+  value?: string;
 }
 
-export function PayMethodCard({paymentMethod:{ key, name }}: PayMethodProps){
+export function PayMethodCard({paymentMethod, value}: PayMethodProps){
   const { sizes, colors } = useTheme()
 
   const iconSize = sizes[5]
@@ -17,27 +18,27 @@ export function PayMethodCard({paymentMethod:{ key, name }}: PayMethodProps){
   return(
     <HStack alignItems="center">
       {
-        key === 'boleto' ?
+        paymentMethod?.key === 'boleto' || value === 'boleto' ?
         <Barcode 
           size={iconSize}
           color={iconsColor}
         />
-        : key === 'pix' ?
+        : paymentMethod?.key  === 'pix' || value === 'pix' ?
         <QrCode 
           size={iconSize}
           color={iconsColor}
         />
-        : key === 'cash'?
+        : paymentMethod?.key  === 'cash'  || value === 'cash'?
         <Money 
           size={iconSize}
           color={iconsColor}
         />
-        : key === 'card' ?
+        : paymentMethod?.key === 'card' || value === 'card' ?
         <CreditCard 
           size={iconSize}
           color={iconsColor}
         />
-        : key === 'deposit' ?
+        : paymentMethod?.key === 'deposit' || value === 'deposit' ?
         <Bank 
           size={iconSize}
           color={iconsColor}
@@ -50,7 +51,7 @@ export function PayMethodCard({paymentMethod:{ key, name }}: PayMethodProps){
         color="gray.600"
         ml={2}
       >
-        {name}
+        {paymentMethod?.name ? paymentMethod.name : value}
       </Text>
     </HStack>
   )

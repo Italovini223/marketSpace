@@ -44,7 +44,7 @@ export function PreView(){
     try {
       setIsLoading(true)
       await createProduct(product)
-      
+      navigation.navigate('home')
       toast.show({
         title: 'Produto criado com sucesso',
         placement: 'top',
@@ -52,10 +52,11 @@ export function PreView(){
       })
 
       setIsLoading(false)
-      navigation.navigate('home')
+  
 
     } catch(error){
       const isAppError = error instanceof AppError
+
 
       const title = isAppError ? error.message : 'nao foi possível criar o produto!'
 
@@ -200,8 +201,8 @@ export function PreView(){
               {
                 product.payment_methods.map((payMethod, index) => (
                   <PayMethodCard 
-                    payMethod={payMethod}
-                    key={index}
+                   value={payMethod}
+                   key={index}
                   />
                 ))
               }
