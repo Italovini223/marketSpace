@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 import { useAuth } from '@hooks/useAuth'
+import { useProduct } from '@hooks/useProduct'
 
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { AppNavigatorRoutesProps } from '@routes/app.routes'
 
 import { useRoute } from '@react-navigation/native'
@@ -40,20 +41,53 @@ export function Product(){
 
   const { id } = route.params as routeParams
   const { user } = useAuth()
+  const { setIsActiveProductStatus } = useProduct()
 
 
   function handleBack(){
     navigation.navigate('home')
   } 
 
+  function handleGoEdit(){
+    navigation.navigate('edit', { product })
+  }
+  
+  async function handleIsActiveProductStatus(is_new: boolean){
+    try {
+      setIsLoading(true)
+      await setIsActiveProductStatus(is_new, id)
+
+      toast.show({
+        title: 'Status do produto atualizado com sucesso',
+        placement: 'top',
+        bgColor: 'success.500'
+      })
+
+      navigation.navigate('myProducts')
+
+    } catch (error){
+      const isAppError = error instanceof AppError
+      const title = isAppError ? error.message : 'Não foi possível atualizar o status do produto'
+      
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
 
-  useEffect(() => {
+
+  useFocusEffect(useCallback(() => {
     async function fetchProduct(){
       try{
         setIsLoading(true)
         const response = await api.get(`/products/${id}`)
         setProduct(response.data)
+        console.log(response.data)
       }catch(error){
         const isAppError = error instanceof AppError
         const title = isAppError? error.message : 'Nao foi  carregar o produto'
@@ -74,9 +108,10 @@ export function Product(){
 
     fetchProduct()
 
-  }, [id])
+  }, [id]))
 
   const isMyProduct = user.id === product.user?.user_id || product.user_id === user.id
+  const isActive = product.is_active?  product.is_active === true ?  true : false : product.is_active === false ? false : true
 
 
   return(
@@ -97,7 +132,7 @@ export function Product(){
               </TouchableOpacity>
               {
                 isMyProduct? 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleGoEdit}>
                   <PencilSimpleLine 
                     size={sizes[6]}
                     color={colors.gray[700]}
@@ -126,7 +161,7 @@ export function Product(){
                   <CarouselImage 
                     source={{uri: `${api.defaults.baseURL}/images/${item.path}`}}
                     alt={`imagem de ${product.name}`}
-                    isActive={true}
+                    isActive={isActive}
                   />
                 )}
               />
@@ -265,6 +300,7 @@ export function Product(){
                       variant="ghost"
                       haveIcon
                       iconName='power-settings-new'
+                      onPress={() => handleIsActiveProductStatus(false)}
                     />
                     <Button 
                       title='Excluir anuncio'
@@ -279,6 +315,7 @@ export function Product(){
                       variant="outline"
                       haveIcon
                       iconName='power-settings-new'
+                      onPress={() => handleIsActiveProductStatus(true)}
                     />
                     <Button 
                       title='Excluir anuncio'

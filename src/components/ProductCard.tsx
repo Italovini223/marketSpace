@@ -19,7 +19,7 @@ export function ProductCard({ isLoading, product }: Props){
   const { user } = useAuth()
 
   const isMyProduct = product.user?.user_id === user.id || product.user_id === user.id
-  const isActive = product.is_active?  product.is_active === true ?  true : false : true
+  const isActive = product.is_active?  product.is_active === true ?  true : false : product.is_active === false ? false : true
 
   function handleProduct(){
     navigation.navigate('product', {id: product.id})

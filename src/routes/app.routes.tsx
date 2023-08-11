@@ -14,11 +14,13 @@ import { PreView } from "@screens/PreView";
 import { House, Tag, SignOut } from 'phosphor-react-native'
 import { useEffect } from "react";
 import { Loading } from "@components/Loading";
-import { color } from "native-base/lib/typescript/theme/styled-system";
+import { Edit } from "@screens/Edit";
+import { productResponseDto } from "@dtos/productResponseDto";
 
 type AppRoutes = {
   home: undefined;
   product: { id: string};
+  edit: {product: productResponseDto}
   myProducts: undefined;
   logout: undefined;
   new: undefined;
@@ -111,6 +113,17 @@ export function AppRoutes(){
       />
 
       <Screen 
+        name="edit"
+        component={Edit}
+        options={{
+          tabBarButton: () => undefined,
+          tabBarStyle: {
+            display: 'none'
+          }
+        }}
+      />
+
+      <Screen 
         name="singOut"
         component={() => {
           const { singOut } = useAuth()
@@ -132,6 +145,7 @@ export function AppRoutes(){
           )
         }}
       />
+
 
     </Navigator>
 

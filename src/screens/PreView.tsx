@@ -22,7 +22,7 @@ import { api } from '@services/api'
 import { AppError } from '@utils/appError'
 
 export function PreView(){
-  const [images, setImages] = useState<string[]>([])
+  const [images, setImages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const { sizes } = useTheme()
   const { product, createProduct } = useProduct()
@@ -93,7 +93,7 @@ export function PreView(){
             height={sizes[72]}
             renderItem={({item}) => (
               <CarouselImage 
-                source={{uri: item}}
+                source={{uri: item.uri? item.uri : `${api.defaults.baseURL}/images/${item.path}`}}
                 alt="teste"
                 isActive={true}
               />

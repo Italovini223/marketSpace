@@ -7,14 +7,15 @@ import { productDto } from '@dtos/productDto'
 import { api } from "@services/api";
 
 import { storageProductSave, storageProductGet, storageProductDelete } from '@storage/storageProduct'
-import { string } from "yup";
+
 
 
 type ProductContextDataPros = {
   product: productDto; 
-
   createProduct: (product: productDto) => Promise<void>;
   saveProduct: (product: productDto) => Promise<void>;
+  setIsActiveProductStatus: (is_active: boolean, id: string) => Promise<void>;
+  updateProduct: (product: productDto) => Promise<void>;
 }
 
 type ProductContextProviderProps = {
@@ -39,6 +40,45 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
     
   }
 
+  async function setIsActiveProductStatus(is_active: boolean, id: string){
+    try {
+      await api.patch(`/products/${id}`, {
+        is_active
+      })
+
+    } catch (error){
+      throw error
+    }
+  }
+
+  async function saveProductImages(images: any[], id: string, productName: string){
+    try {
+
+      const productImagesForm = new FormData()
+
+      images.forEach(item => {
+        const imageFile = {
+          ...item,
+          name: productName + '.' + item.name
+        } as any
+
+        productImagesForm.append("images", imageFile)
+      })
+
+      productImagesForm.append("product_id", id)
+
+
+      await api.post('/products/images', productImagesForm, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+      })
+
+    } catch (error){
+      throw error
+    }
+  }
+
   async function createProduct({ name, price, accept_trade, payment_methods, description, is_new, images}: productDto){
     try {
       const {data} = await api.post('/products', {
@@ -50,26 +90,7 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
         is_new
       })
 
-      const productImagesForm = new FormData()
-
-
-      images.forEach(item => {
-        const imageFile = {
-          ...item,
-          name: data.name + '.' + item.name
-        } as any
-
-        productImagesForm.append("images", imageFile)
-      })
-
-      productImagesForm.append("product_id", data.id)
-
-
-      await api.post('/products/images', productImagesForm, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        }
-      })
+      await saveProductImages(images, data.id, data.name)
 
       storageProductDelete()
 
@@ -78,6 +99,29 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
     } finally{
 
     }
+  }
+
+
+  async function updateProduct({name, description, is_new, price, accept_trade, payment_methods, images, id }: productDto){
+    try {
+      const updatedProduct = {
+        name,
+        description,
+        is_new,
+        price,
+        accept_trade,
+        payment_methods
+      }
+
+      await api.put(`/products/${id}`, {
+        updatedProduct
+      })
+
+      await saveProductImages(images, id ? id: '', name)
+      
+    } catch (error){
+      throw error
+    } 
   }
   useEffect(() => {
     getProduct()
@@ -88,7 +132,9 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
       value={{
         product,
         createProduct,
-        saveProduct
+        saveProduct,
+        setIsActiveProductStatus,
+        updateProduct
       }}
     >
       { children }

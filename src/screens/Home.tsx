@@ -329,7 +329,7 @@ export function Home(){
               value={accept_trade}
               m={0}
               position="absolute"
-              top={2}
+              top={Platform.OS === 'android' ? 2 : 5}
             />
           </VStack>
 

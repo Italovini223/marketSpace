@@ -124,14 +124,14 @@ export function New(){
     const product = {
       name,
       description,
-      price: priceNumber/10,
+      price: priceNumber/100,
       payment_methods: paymentOptions,
        accept_trade,
       is_new: isNew === 'new' ? true : false,
       images: imagesFiles,
     }
 
-    await storageProductImagesSave(images)
+    await storageProductImagesSave(imagesFiles)
 
     await saveProduct(product)
 
