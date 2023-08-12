@@ -64,6 +64,8 @@ export function Edit(){
   const [description, setDescription] = useState(product.description)
   const [price, setPrice] = useState(String(product.price) + ',00')
   const [imagesFiles, setImagesFiles] = useState<any[]>(product.product_images)
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([])
+  const [newImagesFiles, setNewImagesFiles] = useState<any[]>([])
   const [loadingImage, setLoadingImage] = useState(false)
   const [paymentOptions, setPaymentOptions] = useState<string[]>(product.payment_methods.map(paymentMethod => paymentMethod.key))
   const [accept_trade, setAccept_trade] = useState(product.accept_trade)
@@ -81,6 +83,10 @@ export function Edit(){
 
   function handleBack(){
     navigation.navigate('home')
+  }
+
+  function handleDeleteImage(id: string){
+    setImagesToDelete([...imagesToDelete, id])
   }
 
 
@@ -117,7 +123,8 @@ export function Edit(){
         type: `${photoSelect.assets[0].uri}/${fileExtension}`
       }
 
-      setImagesFiles([...imagesFiles, photoFile]);
+      setNewImagesFiles([...newImagesFiles, photoFile]);
+      setImagesFiles([...imagesFiles, { uri: photoFile.uri}]);
 
     } catch (error){
       console.log(error)
@@ -131,17 +138,18 @@ export function Edit(){
     try {
       setIsLoading(true)
       const priceWithoutComma = price.replace(/,/g, '');
-      const priceNumber = parseFloat(priceWithoutComma);
+      const priceNumber = parseFloat(priceWithoutComma)/100;
+
 
       const updatedProduct = {
         id: product.id,
         name,
         description,
         is_new: isNew === 'new' ? true : false,
-        price: priceNumber/100,
+        price: priceNumber,
         accept_trade,
         payment_methods: paymentOptions,
-        images: imagesFiles
+        images: newImagesFiles
       }
 
       await updateProduct(updatedProduct)
@@ -218,9 +226,9 @@ export function Edit(){
                         imagesFiles &&
                         imagesFiles.map((image) => (
                           <ProductImageCard 
-                            uri={`${api.defaults.baseURL}/images/${image.path}`}
+                            uri={ image.uri? image.uri : `${api.defaults.baseURL}/images/${image.path}`}
                             description='teste'
-                            onPress={() => console.log('clicou')}
+                            onPress={() => console.log(image)}
                             isLoading={loadingImage}
                             key={image.path}
                           />

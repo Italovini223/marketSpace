@@ -29,10 +29,15 @@ type routeParams = {
   id: string;
 }
 
+type responseDataProps = {
+  data: productResponseDto
+}
+
 
 export function Product(){
   const [isLoading, setIsLoading] = useState(false)
   const [product, setProduct] = useState<productResponseDto>({} as productResponseDto)
+  const [convertedPrice, setConvertedPrice] = useState('')
   const { sizes, colors } = useTheme()
 
   const navigation = useNavigation<AppNavigatorRoutesProps>()
@@ -41,7 +46,10 @@ export function Product(){
 
   const { id } = route.params as routeParams
   const { user } = useAuth()
-  const { setIsActiveProductStatus } = useProduct()
+  const { setIsActiveProductStatus, deleteProduct } = useProduct()
+  
+  const isMyProduct = user.id === product.user?.user_id || product.user_id === user.id
+  const isActive = product.is_active?  product.is_active === true ?  true : false : product.is_active === false ? false : true
 
 
   function handleBack(){
@@ -78,6 +86,35 @@ export function Product(){
       setIsLoading(false)
     }
   }
+  
+  async function handleDeleteProduct(){
+    try {
+      setIsLoading(true)
+
+      await deleteProduct(product.id)
+
+      toast.show({
+        title: 'Produto excluído com sucesso',
+        placement: 'top',
+        bgColor: 'success.500'
+      })
+
+      navigation.navigate('myProducts')
+
+    } catch(error){
+      const isAppError = error instanceof AppError
+      const title = isAppError? error.message : 'não foi possível excluir o produto'
+
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
 
 
@@ -85,9 +122,9 @@ export function Product(){
     async function fetchProduct(){
       try{
         setIsLoading(true)
-        const response = await api.get(`/products/${id}`)
+        const response: responseDataProps = await api.get(`/products/${id}`)
         setProduct(response.data)
-        console.log(response.data)
+        setConvertedPrice(response.data.price.toLocaleString('pt-br'))
       }catch(error){
         const isAppError = error instanceof AppError
         const title = isAppError? error.message : 'Nao foi  carregar o produto'
@@ -110,8 +147,7 @@ export function Product(){
 
   }, [id]))
 
-  const isMyProduct = user.id === product.user?.user_id || product.user_id === user.id
-  const isActive = product.is_active?  product.is_active === true ?  true : false : product.is_active === false ? false : true
+
 
 
   return(
@@ -232,7 +268,7 @@ export function Product(){
                     fontFamily="heading"
                     color="blue.500"
                   >
-                  {product.price}
+                  {convertedPrice}
                   </Heading>
                 </HStack>
               </HStack>
@@ -261,7 +297,7 @@ export function Product(){
                   
                 >
                   <Text fontSize="sm" fontFamily="heading" color="gray.600" mr={2}>Aceita troca?</Text>
-                  <Text fontFamily="body" fontSize="sm" color="gray.600">Sim</Text>
+                  <Text fontFamily="body" fontSize="sm" color="gray.600">{product.accept_trade? 'Sim' : 'Não'}</Text>
                 </HStack>
 
                 <VStack flex={1} my={4}>
@@ -306,6 +342,7 @@ export function Product(){
                       title='Excluir anuncio'
                       haveIcon
                       iconName='delete-outline'
+                      onPress={handleDeleteProduct}
                     />
                   </VStack>
                   :

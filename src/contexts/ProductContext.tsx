@@ -15,7 +15,8 @@ type ProductContextDataPros = {
   createProduct: (product: productDto) => Promise<void>;
   saveProduct: (product: productDto) => Promise<void>;
   setIsActiveProductStatus: (is_active: boolean, id: string) => Promise<void>;
-  updateProduct: (product: productDto) => Promise<void>;
+  updateProduct: (product: productDto, productImagesIds: any[]) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
 }
 
 type ProductContextProviderProps = {
@@ -102,26 +103,45 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
   }
 
 
-  async function updateProduct({name, description, is_new, price, accept_trade, payment_methods, images, id }: productDto){
+  async function updateProduct({name, description, is_new, price, accept_trade, payment_methods, images, id }: productDto, productImagesIds: any[]){
     try {
-      const updatedProduct = {
+
+
+      await api.put(`/products/${id}`, {
         name,
         description,
         is_new,
         price,
         accept_trade,
         payment_methods
-      }
-
-      await api.put(`/products/${id}`, {
-        updatedProduct
       })
 
-      await saveProductImages(images, id ? id: '', name)
+      if(images.length > 0){
+        await saveProductImages(images, id ? id: '', name)
+      }
+
+      if(productImagesIds.length > 0){
+        await api.delete('/products/images', {
+          data: {productImagesIds}
+        })
+
+        
+      }
+
       
     } catch (error){
       throw error
     } 
+  }
+
+
+
+  async function deleteProduct(id: string){
+    try {
+      await api.delete(`/products/${id}`)
+    }catch(error){
+      throw error
+    }
   }
   useEffect(() => {
     getProduct()
@@ -134,7 +154,8 @@ export function ProductContextProvider({children}: ProductContextProviderProps){
         createProduct,
         saveProduct,
         setIsActiveProductStatus,
-        updateProduct
+        updateProduct,
+        deleteProduct
       }}
     >
       { children }
