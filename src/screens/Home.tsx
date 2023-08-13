@@ -126,14 +126,13 @@ export function Home(){
   async function handleApplyFilter({ search }: FormDataProps){
     try {
       setIsLoading(true)
-      console.log("ENTROU")
       let paymentMethodsQuery = ""
 
       payment_methods.map(method => {
         paymentMethodsQuery = paymentMethodsQuery + `&payment_methods=${method}`
       })
 
-      const response = await api.get(`/products/?is_new${is_new}&accept_trade=${accept_trade}${paymentMethodsQuery}${
+      const response = await api.get(`/products?is_new=${is_new}&accept_trade=${accept_trade}${paymentMethodsQuery}${
         search && search?.length > 0 && `&query=${search}`
       }`)
 
@@ -142,6 +141,24 @@ export function Home(){
     } catch (erro){
       const isAppErro = erro instanceof AppError
       const title = isAppErro ? erro.message : 'nao foi possível carregar os produtos'
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function handleSearch({ search }: FormDataProps){
+    try {
+      setIsLoading(true)
+      const response = await api.get(`/products/?query=${search}`)
+      setProducts(response.data)
+    } catch (error) {
+      const isAppErro = error instanceof AppError
+      const title = isAppErro ? error.message : 'nao foi possível carregar os produtos'
       toast.show({
         title,
         placement: 'top',
@@ -192,7 +209,7 @@ export function Home(){
                 mb={6}
                 InputRightElement={
                   <HStack w={20} alignItems="center" justifyContent="space-around">
-                    <TouchableOpacity onPress={handleSubmit(handleApplyFilter)}>
+                    <TouchableOpacity onPress={handleSubmit(handleSearch)}>
                       <MagnifyingGlass 
                         size={iconsSize}
                         color={iconsColor}

@@ -8,8 +8,6 @@ import { Dimensions } from 'react-native'
 import { useProduct } from '@hooks/useProduct'
 import { useAuth } from '@hooks/useAuth'
 
-import { storageProductImagesGet } from '@storage/storageProductImage'
-
 import { HStack, ScrollView, useTheme, useToast, VStack, Text, Box, Heading } from "native-base";
 import Carousel from 'react-native-reanimated-carousel';
 
@@ -22,7 +20,6 @@ import { api } from '@services/api'
 import { AppError } from '@utils/appError'
 
 export function PreView(){
-  const [images, setImages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const { sizes } = useTheme()
   const { product, createProduct } = useProduct()
@@ -35,10 +32,6 @@ export function PreView(){
     navigation.navigate('new')
   } 
 
-  async function fetchImagesPreview(){
-    const imagesPreview = await storageProductImagesGet()
-    setImages(imagesPreview)
-  }
 
   async function handleNewProduct(){
     try {
@@ -70,9 +63,6 @@ export function PreView(){
     }
   }
 
-  useFocusEffect(useCallback(() => {
-    fetchImagesPreview()
-  }, []))
 
   return(
     <VStack flex={1} bg="gray.200"> 
@@ -87,7 +77,7 @@ export function PreView(){
         </VStack>
  
           <Carousel 
-            data={images}
+            data={product.images}
             width={Dimensions.get('window').width}
             loop
             height={sizes[72]}
@@ -199,6 +189,7 @@ export function PreView(){
                 Modelos de pagamento:
               </Text>
               {
+                product.payment_methods&&
                 product.payment_methods.map((payMethod, index) => (
                   <PayMethodCard 
                    value={payMethod}

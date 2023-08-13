@@ -17,8 +17,6 @@ import * as FileSystem from 'expo-file-system'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import { storageProductImagesSave } from '@storage/storageProductImage'
-
 import { useForm, Controller } from 'react-hook-form'
 
 import { ProductImageCard } from '@components/ProductImageCard';
@@ -44,7 +42,6 @@ const saveProductSchema = yup.object({
 })
 
 export function New(){
-  const [images, setImages] = useState<string[]>([])
   const [imagesFiles, setImagesFiles] = useState<any[]>([])
   const [loadingImage, setLoadingImage] = useState(false)
   const [paymentOptions, setPaymentOptions] = useState<string[]>([])
@@ -64,6 +61,12 @@ export function New(){
 
   function handleBack(){
     navigation.navigate('home')
+  }
+
+
+  function handleRemoveImage(uri: string){
+    const filteredImages = imagesFiles.filter(imageFile => imageFile.uri !== uri);
+    setImagesFiles(filteredImages)
   }
 
 
@@ -101,7 +104,6 @@ export function New(){
       }
 
       setImagesFiles([...imagesFiles, photoFile]);
-      setImages([...images, photoSelect.assets[0].uri])
 
     } catch (error){
       console.log(error)
@@ -111,14 +113,9 @@ export function New(){
   }
 
   async function handleSaveProduct({ description, name, price }: formDataProps){
-    console.log(paymentOptions)
-    console.log( accept_trade)
-    console.log(isNew)
 
     const priceWithoutComma = price.replace(/,/g, '');
     const priceNumber = parseFloat(priceWithoutComma);
-
-    console.log(priceNumber)
 
 
     const product = {
@@ -131,7 +128,6 @@ export function New(){
       images: imagesFiles,
     }
 
-    await storageProductImagesSave(imagesFiles)
 
     await saveProduct(product)
 
@@ -171,19 +167,19 @@ export function New(){
               </Text>
               <HStack>
                 {
-                  images &&
-                  images.map((image) => (
+                  imagesFiles &&
+                  imagesFiles.map((image, index) => (
                     <ProductImageCard 
-                      uri={image}
+                      uri={image.uri}
                       description='teste'
-                      onPress={() => console.log('clicou')}
+                      onPress={() => handleRemoveImage(image.uri)}
                       isLoading={loadingImage}
-                      key={image}
+                      key={index}
                     />
                   ))
                 }
                 {
-                  images.length < 3 && 
+                  imagesFiles.length < 3 && 
                   <SelectProductImage 
                     onPress={handleProductImageSelect}
                   />
@@ -294,6 +290,7 @@ export function New(){
               title='Cancelar'
               w="50%"
               mr={3}
+              onPress={handleBack}
             />
             <Button 
               title='Avançar'

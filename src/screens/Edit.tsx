@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import { useProduct } from '@hooks/useProduct';
 import { useRoute } from '@react-navigation/native';
@@ -19,8 +19,6 @@ import * as FileSystem from 'expo-file-system'
 
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup';
-
-import { storageProductImagesSave } from '@storage/storageProductImage'
 
 import { useForm, Controller } from 'react-hook-form'
 
@@ -70,24 +68,28 @@ export function Edit(){
   const [paymentOptions, setPaymentOptions] = useState<string[]>(product.payment_methods.map(paymentMethod => paymentMethod.key))
   const [accept_trade, setAccept_trade] = useState(product.accept_trade)
   const [isNew, setIsNew] = useState(product.is_new ? 'new': 'used')
-
-
-
+  
   const { sizes, colors } = useTheme()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
   const { updateProduct } = useProduct()
 
-
-  
   const toast = useToast()
 
   function handleBack(){
     navigation.navigate('home')
   }
 
-  function handleDeleteImage(id: string){
+  function handleDeleteImage(id: string, uri: string){
     setImagesToDelete([...imagesToDelete, id])
+    handleRemoveImage(uri)
+
   }
+
+  function handleRemoveImage(uri: string){
+    const filteredImages = imagesFiles.filter(imageFile => imageFile.uri ? imageFile.uri !== uri : imageFile.path !== uri);
+    setImagesFiles(filteredImages)
+  }
+
 
 
   async function handleProductImageSelect(){
@@ -152,7 +154,7 @@ export function Edit(){
         images: newImagesFiles
       }
 
-      await updateProduct(updatedProduct)
+      await updateProduct(updatedProduct, imagesToDelete)
 
       toast.show({
         title: 'Produto atualizado com sucesso',
@@ -226,9 +228,9 @@ export function Edit(){
                         imagesFiles &&
                         imagesFiles.map((image) => (
                           <ProductImageCard 
-                            uri={ image.uri? image.uri : `${api.defaults.baseURL}/images/${image.path}`}
+                            uri={image.uri? image.uri : `${api.defaults.baseURL}/images/${image.path}`}
                             description='teste'
-                            onPress={() => console.log(image)}
+                            onPress={() => handleDeleteImage(image.id ? image.id : '', image.uri ? image.uri : image.path)}
                             isLoading={loadingImage}
                             key={image.path}
                           />

@@ -5,8 +5,11 @@ import { TouchableOpacity } from 'react-native'
 import { HStack, Heading, VStack, useTheme, Text, Select, FlatList, useToast } from "native-base";
 
 import { useProduct } from '@hooks/useProduct';
+import { useNavigation } from '@react-navigation/native';
 
 import { productResponseDto } from '@dtos/productResponseDto';
+import { AppNavigatorRoutesProps } from '@routes/app.routes'
+
 import { AppError } from '@utils/appError';
 
 import { Plus } from 'phosphor-react-native'
@@ -26,6 +29,7 @@ export function MyProducts() {
   const { sizes, colors } = useTheme()
   const toast = useToast()
   const { product } = useProduct()
+  const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   async function fetchProducts(){
     try {
@@ -47,6 +51,10 @@ export function MyProducts() {
     }finally {
       setIsLoading(false)
     }
+  }
+
+  function handleNew(){
+    navigation.navigate('new')
   }
 
   useFocusEffect(useCallback(() => {
@@ -77,6 +85,7 @@ export function MyProducts() {
               position: 'absolute',
               right: sizes[6]
             }}
+            onPress={handleNew}
           >
             <Plus 
               size={sizes[6]}

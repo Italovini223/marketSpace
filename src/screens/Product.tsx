@@ -8,7 +8,7 @@ import { AppNavigatorRoutesProps } from '@routes/app.routes'
 
 import { useRoute } from '@react-navigation/native'
 
-import { TouchableOpacity, Dimensions } from 'react-native'
+import { TouchableOpacity, Dimensions, Linking } from 'react-native'
 
 import { PencilSimpleLine, ArrowLeft } from 'phosphor-react-native'
 
@@ -59,7 +59,7 @@ export function Product(){
   function handleGoEdit(){
     navigation.navigate('edit', { product })
   }
-  
+
   async function handleIsActiveProductStatus(is_new: boolean){
     try {
       setIsLoading(true)
@@ -116,7 +116,9 @@ export function Product(){
     }
   }
 
-
+  async function openWhatsAppUrl(){
+    await Linking.openURL(`https://wa.me/55${product.user?.tel}`)
+  }
 
   useFocusEffect(useCallback(() => {
     async function fetchProduct(){
@@ -237,9 +239,13 @@ export function Product(){
                 rounded="lg"
                 alignItems="center"
                 mt={6}
-                color={product.is_new ? "white": "gray.700"}
               >
-                <Text>{product.is_new ? "Novo" : 'Usado'}</Text>
+                <Text 
+                color={product.is_new ? "white": "gray.700"}
+                
+                >
+                  {product.is_new ? "Novo" : 'Usado'}
+                </Text>
               </Box>
 
               <HStack 
@@ -326,6 +332,7 @@ export function Product(){
                     haveIcon
                     iconName='phone-iphone'
                     mt={4}
+                    onPress={openWhatsAppUrl}
                   />
 
                   : 
