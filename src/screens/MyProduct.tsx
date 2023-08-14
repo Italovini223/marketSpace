@@ -25,11 +25,18 @@ export function MyProducts() {
   const [products, setProducts] = useState<productResponseDto[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showAlert, setShowAlert] = useState(true)
+  const [filterValue, setFilterValue] = useState('all')
 
   const { sizes, colors } = useTheme()
   const toast = useToast()
   const { product } = useProduct()
   const navigation = useNavigation<AppNavigatorRoutesProps>()
+  
+
+  const filteredProducts = products.filter(product => {
+    const filter = filterValue === 'active' ? true : filterValue === 'all' ? true : false
+    return product.is_active === filter
+  }) 
 
   async function fetchProducts(){
     try {
@@ -57,10 +64,10 @@ export function MyProducts() {
     navigation.navigate('new')
   }
 
+
   useFocusEffect(useCallback(() => {
     fetchProducts()
     setShowAlert(true)
-    console.log("LOCAL STORAGE => ",product)
   }, []))
 
 
@@ -112,10 +119,11 @@ export function MyProducts() {
                 defaultValue='todos'
                 w={24}
                 rounded="md"
+                onValueChange={value =>  {setFilterValue(value); console.log(filteredProducts)}}
               >
                 <Select.Item label='todos' value='todos' />
-                <Select.Item label='novo' value='novo'/>
-                <Select.Item label='usado' value='usado'/>
+                <Select.Item label='ativos' value='actives'/>
+                <Select.Item label='inativos' value='inatives'/>
               </Select>
             </HStack>
           </HStack>
@@ -127,7 +135,7 @@ export function MyProducts() {
               :
               products.length < 2 ? 
                 <FlatList 
-                    data={products}
+                    data={filteredProducts}
                     keyExtractor={item => String(item)}
                     flexDirection="row"
 
@@ -147,7 +155,7 @@ export function MyProducts() {
                 :
 
                 <FlatList 
-                  data={products}
+                  data={filteredProducts}
                   keyExtractor={item => String(item)}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{

@@ -31,6 +31,10 @@ type FormDataProps = {
   search: string | undefined;
 }
 
+type MyProductsResponseDataProps = {
+  data: productResponseDto[]
+}
+
 
 export function Home(){
   const [products, setProducts] = useState<productResponseDto[]>([])
@@ -106,10 +110,10 @@ export function Home(){
   async function fetchMyProducts(){
     try {
       setIsLoading(true)
-      const response = await api.get('/users/products')
-      setMyProducts(response.data)
+      const response: MyProductsResponseDataProps = await api.get('/users/products')
+      const filteredProducts = response.data.filter(product => product.is_active === true)
+      setMyProducts(filteredProducts)
     }catch(error){
-      console.log(error)
       const isAppError = error instanceof AppError
       const title = isAppError ? error.message : 'Nao foi possivel carregar seus produtos'
 
