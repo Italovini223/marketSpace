@@ -189,9 +189,10 @@ export function MyProducts() {
           </VStack>
           </VStack>
           {
-            product.id && showAlert ?  
+            product.name && showAlert ?  
             <Alert 
               handleOnPress={() => setShowAlert(false)}
+              productName={product.name}
             />
             :
             undefined

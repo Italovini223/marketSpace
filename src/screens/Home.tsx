@@ -242,7 +242,7 @@ export function Home(){
               <FlatList 
                   data={products}
                   keyExtractor={item => String(item)}
-                  flexDirection="row"
+                  key={'_'}
                   ListEmptyComponent={() => (
                     <Text fontFamily="heading" fontSize="md" color="gray.700" >
                       Ainda nao ha produtos cadastrados
@@ -261,6 +261,7 @@ export function Home(){
               <FlatList 
                 data={products}
                 keyExtractor={item => String(item)}
+                key={'#'}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                   justifyContent: 'space-between'

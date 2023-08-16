@@ -7,9 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 
 type props = {
   handleOnPress: () => void;
+  productName: string;
 }
 
-export function Alert({ handleOnPress }: props) {
+export function Alert({ handleOnPress, productName }: props) {
   const navigation = useNavigation<AppNavigatorRoutesProps>()
 
   function handlePreView(){
@@ -33,7 +34,7 @@ export function Alert({ handleOnPress }: props) {
           <Icon as={Ionicons} name="notifications-outline" size={5} color="white" mr={2}/>
   
           <Text fontSize="md" color="white" flex={1} textAlign="center">
-            Voce tem um produto pendente a ser postado
+            O produto {productName} esta aguardando para ser postado
           </Text>
   
         <IconButton 
