@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { TouchableOpacity } from 'react-native'
 
@@ -20,12 +20,11 @@ import { api } from '@services/api';
 import { Alert } from '@components/Alert';
 
 
-
 export function MyProducts() {
   const [products, setProducts] = useState<productResponseDto[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showAlert, setShowAlert] = useState(true)
-  const [filterValue, setFilterValue] = useState('all')
+  const [filteredProducts, setFilteredProducts] = useState<productResponseDto[]>([])
 
   const { sizes, colors } = useTheme()
   const toast = useToast()
@@ -33,10 +32,24 @@ export function MyProducts() {
   const navigation = useNavigation<AppNavigatorRoutesProps>()
   
 
-  const filteredProducts = products.filter(product => {
-    const filter = filterValue === 'active' ? true : filterValue === 'all' ? true : false
-    return product.is_active === filter
-  }) 
+  function handleApplyFilter(value?: string) {
+    try { 
+      setIsLoading(true)
+
+      if(value === 'all'){
+        setFilteredProducts(products)
+      } else if(value === 'actives'){
+        setFilteredProducts(products.filter(product => product.is_active === true))
+      } else if(value === 'inactive'){
+        setFilteredProducts(products.filter(product => product.is_active === false))
+      }
+      
+    } catch(error){
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   async function fetchProducts(){
     try {
@@ -44,6 +57,7 @@ export function MyProducts() {
       const response = await api.get('/users/products')
 
       setProducts(response.data)
+      setFilteredProducts(response.data)
 
     } catch (error){
       const isAppError = error instanceof AppError
@@ -119,11 +133,11 @@ export function MyProducts() {
                 defaultValue='todos'
                 w={24}
                 rounded="md"
-                onValueChange={value =>  {setFilterValue(value); console.log(filteredProducts)}}
+                onValueChange={value =>  handleApplyFilter(value)}
               >
-                <Select.Item label='todos' value='todos' />
+                <Select.Item label='todos' value='all' />
                 <Select.Item label='ativos' value='actives'/>
-                <Select.Item label='inativos' value='inatives'/>
+                <Select.Item label='inativos' value='inactive'/>
               </Select>
             </HStack>
           </HStack>
@@ -133,12 +147,12 @@ export function MyProducts() {
               isLoading ?
               <Loading />
               :
-              products.length < 2 ? 
+              filteredProducts.length < 2 ? 
                 <FlatList 
                     data={filteredProducts}
                     keyExtractor={item => String(item)}
                     flexDirection="row"
-
+                    key={'_'}
                     renderItem={({item}) => (
                       <ProductCard 
                         isLoading={false}
@@ -161,6 +175,7 @@ export function MyProducts() {
                   contentContainerStyle={{
                     justifyContent: 'space-between'
                   }}
+                  key={'#'}
                   numColumns={2}
                   renderItem={({item}) => (
                     <ProductCard 
