@@ -1,7 +1,7 @@
 import { storageAuthTokenGet, storageAuthTokenSave } from '@storage/storageAuthToken';
 import { AppError } from '@utils/appError'
 import axios, { AxiosError, AxiosInstance } from 'axios'
-import { err } from 'react-native-svg/lib/typescript/xml';
+
 
 
 type singOut = () => void;

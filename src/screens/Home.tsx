@@ -99,9 +99,6 @@ export function Home(){
         bgColor: 'red.500'
       })
 
-      if(title === 'token.invalid'){
-        singOut()
-      }
     }finally {
       setIsLoading(false)
     }
