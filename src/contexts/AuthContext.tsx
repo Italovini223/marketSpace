@@ -24,12 +24,12 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
   const [user, setUser] = useState<userDto>({} as userDto)
   const [isLoadingUserData, setIsLoadingUserData] = useState(true)
 
-  async function storageUserAndTokenSave(userData: userDto, token: string){
+  async function storageUserAndTokenSave(userData: userDto, token: string, refresh_token: string){
     try {
 
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       await storageUserSave(userData)
-      await storageAuthTokenSave(token)
+      await storageAuthTokenSave({token, refresh_token})
 
       setUser(userData)
     } catch (error) {
@@ -55,8 +55,8 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
         password
       })
 
-      if(data.user && data.token){
-       storageUserAndTokenSave(data.user, data.token)
+      if(data.user && data.token && data.refresh_token) {
+       storageUserAndTokenSave(data.user, data.token, data.refresh_token)
       }
 
     } catch (error){
@@ -67,7 +67,7 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
   async function loadUserData(){
     try {
       const userLogged = await storageUserGet()
-      const token = await storageAuthTokenGet()
+      const {token} = await storageAuthTokenGet()
   
       if(token && userLogged){
         await userAndTokenUpdate(userLogged, token)
@@ -88,6 +88,10 @@ export function AuthContextProvider({children}:AuthContextProviderProps){
       throw error
     }
   }
+
+  useEffect(() => {
+    api.registerInterceptTokenManager(singOut)
+  }, [])
 
   useEffect(() => {
     loadUserData()
